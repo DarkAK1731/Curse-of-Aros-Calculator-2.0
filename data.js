@@ -1,8 +1,4 @@
-// ================================
-// COA Calculator - data.js
-// Provides: levelXP, skills
-// ================================
-
+// data.js (FULL + ACCURATE, includes Desert Wolf in MAGE)
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -109,16 +105,13 @@ const skills = {
     items: [
       { key:"paper",         name:"Paper",         level:1,  xp:1,    materials:[ {name:"Pine Logs", qty:1} ] },
       { key:"book",          name:"Book",          level:3,  xp:5,    materials:[ {name:"Paper", qty:5}, {name:"Leather", qty:1} ] },
-
       { key:"ember_tome",    name:"Ember Tome",    level:5,  xp:12,   materials:[ {name:"Book", qty:1}, {name:"Relic of Fire", qty:1}, {name:"Magic Essence", qty:1} ] },
       { key:"leech_tome",    name:"Leech Tome",    level:9,  xp:20,   materials:[ {name:"Book", qty:1}, {name:"Relic of Nature", qty:1}, {name:"Magic Essence", qty:1} ] },
       { key:"icicle_tome",   name:"Icicle Tome",   level:15, xp:28,   materials:[ {name:"Book", qty:1}, {name:"Ice Relic", qty:1}, {name:"Magic Essence", qty:1} ] },
       { key:"haunt_tome",    name:"Haunt Tome",    level:20, xp:40,   materials:[ {name:"Book", qty:1}, {name:"Cursed Relic", qty:1}, {name:"Magic Essence", qty:1} ] },
-
       { key:"ignite_tome",   name:"Ignite Tome",   level:29, xp:100,  materials:[ {name:"Book", qty:1}, {name:"Relic of Fire", qty:1}, {name:"Magic Essence", qty:5} ] },
       { key:"drain_tome",    name:"Drain Tome",    level:33, xp:115,  materials:[ {name:"Book", qty:1}, {name:"Relic of Nature", qty:1}, {name:"Magic Essence", qty:3} ] },
       { key:"freeze_tome",   name:"Freeze Tome",   level:40, xp:200,  materials:[ {name:"Book", qty:1}, {name:"Ice Relic", qty:1}, {name:"Magic Essence", qty:3} ] },
-
       { key:"curse_tome",    name:"Curse Tome",    level:60, xp:900,  materials:[ {name:"Book", qty:1}, {name:"Cursed Relic", qty:1}, {name:"Magic Essence", qty:3} ] },
       { key:"inferno_tome",  name:"Inferno Tome",  level:68, xp:1380, materials:[ {name:"Book", qty:1}, {name:"Relic of Fire", qty:1}, {name:"Magic Essence", qty:10} ] },
       { key:"consume_tome",  name:"Consume Tome",  level:76, xp:2110, materials:[ {name:"Book", qty:1}, {name:"Relic of Nature", qty:1}, {name:"Magic Essence", qty:6} ] },
@@ -138,21 +131,17 @@ const skills = {
       { key:"cooked_anchovies",   name:"Cooked Anchovies",   level:1,   xp:10,    materials:[ {name:"Anchovies", qty:1} ] },
       { key:"cooked_mackerel",    name:"Cooked Mackerel",    level:10,  xp:50,    materials:[ {name:"Mackerel", qty:1} ] },
       { key:"cooked_squid",       name:"Cooked Squid",       level:20,  xp:115,   materials:[ {name:"Squid", qty:1} ] },
-
       { key:"cooked_sardine",     name:"Cooked Sardine",     level:30,  xp:375,   materials:[ {name:"Sardine", qty:1}, {name:"Salt", qty:1} ] },
       { key:"cooked_eel",         name:"Cooked Eel",         level:40,  xp:500,   materials:[ {name:"Eel", qty:2}, {name:"Salt", qty:1} ] },
       { key:"cooked_anglerfish",  name:"Cooked Anglerfish",  level:45,  xp:625,   materials:[ {name:"Anglerfish", qty:1}, {name:"Salt", qty:1} ] },
       { key:"cooked_trout",       name:"Cooked Trout",       level:50,  xp:750,   materials:[ {name:"Trout", qty:1}, {name:"Salt", qty:1} ] },
-
       { key:"bear_roast",         name:"Bear Roast",         level:55,  xp:1050,  materials:[ {name:"Bear Meat", qty:1}, {name:"Salt", qty:1} ] },
       { key:"polar_bear_roast",   name:"Polar Bear Roast",   level:65,  xp:1500,  materials:[ {name:"Polar Bear Meat", qty:1}, {name:"Pink Salt", qty:1} ] },
-
       { key:"cooked_bass",        name:"Cooked Bass",        level:60,  xp:1350,  materials:[ {name:"Bass", qty:1}, {name:"Pink Salt", qty:1} ] },
       { key:"cooked_tuna",        name:"Cooked Tuna",        level:70,  xp:2000,  materials:[ {name:"Tuna", qty:1}, {name:"Pink Salt", qty:1} ] },
       { key:"cooked_lobster",     name:"Cooked Lobster",     level:75,  xp:3500,  materials:[ {name:"Lobster", qty:1}, {name:"Pink Salt", qty:1} ] },
       { key:"cooked_sea_turtle",  name:"Cooked Sea Turtle",  level:80,  xp:6500,  materials:[ {name:"Sea Turtle", qty:1}, {name:"Pink Salt", qty:1} ] },
       { key:"cooked_manta_ray",   name:"Cooked Manta Ray",   level:85,  xp:9500,  materials:[ {name:"Manta Ray", qty:1}, {name:"Pink Salt", qty:1} ] },
-
       { key:"cooked_shark",       name:"Cooked Shark",       level:90,  xp:13500, materials:[ {name:"Shark", qty:1}, {name:"Black Salt", qty:1} ] },
       { key:"cooked_orca",        name:"Cooked Orca",        level:95,  xp:22500, materials:[ {name:"Orca", qty:1}, {name:"Black Salt", qty:1} ] },
       { key:"cooked_giant_squid", name:"Cooked Giant Squid", level:100, xp:41500, materials:[ {name:"Giant Squid", qty:1}, {name:"Black Salt", qty:1} ] },
@@ -214,9 +203,6 @@ const skills = {
     ]
   },
 
-  // =========================
-  // NEW: MELEE (alphabetical)
-  // =========================
   melee: {
     title: "Melee",
     currentLabel: "Your Melee Level",
@@ -281,9 +267,6 @@ const skills = {
     ]
   },
 
-  // =======================
-  // NEW: MAGE (alphabetical)
-  // =======================
   mage: {
     title: "Mage",
     currentLabel: "Your Mage Level",
@@ -308,6 +291,10 @@ const skills = {
       { key:"corrupted_venomling",  name:"Corrupted Venomling",   level:1, xp:4150,  meta:{ mobLevel:92 } },
       { key:"defiled_scarab",       name:"Defiled Scarab",        level:1, xp:8000,  meta:{ mobLevel:105 } },
       { key:"desert_raptor",        name:"Desert raptor",         level:1, xp:1850,  meta:{ mobLevel:57 } },
+
+      // ✅ Added correctly: Desert Wolf (level 140) = 13500
+      { key:"desert_wolf",          name:"Desert Wolf",           level:1, xp:13500, meta:{ mobLevel:140 } },
+
       { key:"disdained_venomling",  name:"Disdained Venomling",   level:1, xp:15000, meta:{ mobLevel:125 } },
       { key:"fishing_spider",       name:"Fishing Spider",        level:1, xp:38,    meta:{ mobLevel:8 } },
       { key:"forest_bat",           name:"Forest bat",            level:1, xp:60,    meta:{ mobLevel:15 } },
