@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,6 @@
 <body>
   <header class="top">
     <h1>Curse of Aros Calculator 2.0 by AK1731</h1>
-
     <nav class="tabs" aria-label="Skills">
       <button class="tab active" data-skill="fishing">Fishing</button>
       <button class="tab" data-skill="mining">Mining</button>
@@ -26,7 +26,6 @@
   <main class="wrap">
     <section class="panel">
       <h2 id="skillTitle">Fishing</h2>
-
       <div class="levels">
         <label class="field">
           <span id="currentLabel">Your Fishing Level</span>
@@ -38,7 +37,6 @@
           <input id="targetLevel" type="number" min="1" max="120" value="5" inputmode="numeric" />
         </label>
 
-        <!-- NEW: Current XP as % -->
         <label class="field">
           <span id="currentXPLabel">Current XP % (0–100)</span>
           <input id="currentXP" type="number" min="0" max="100" value="0" inputmode="numeric" />
@@ -58,14 +56,19 @@
           World Boost (+50%)
         </label>
 
+        <!-- ✅ NEW: Bonus XP Stars -->
+        <label class="toggle">
+          <input id="bonusStars" type="checkbox" />
+          Bonus XP Stars (x2)
+        </label>
+
         <label class="toggle">
           <input id="wisdomRelic" type="checkbox" />
-          EXP Relic (+5%)
+          <span id="relicName">Wisdom Relic</span> (+5%)
         </label>
 
         <div id="setBonusBox">
           <div class="subtle" style="margin-top:10px;">Set bonus (choose one)</div>
-
           <label class="toggle">
             <input type="radio" name="setBonus" value="1" checked />
             None
