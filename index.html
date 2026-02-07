@@ -4,14 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>COA Calculator 2.0 by AK1731</title>
+  <title>Curse of Aros Calculator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <header class="top">
-    <h1>Curse of Aros Calculator 2.0 by AK1731</h1>
-
+    <h1>Curse of Aros Calculator</h1>
+    <h2>By AK1731</h2>
     <nav class="tabs" aria-label="Skills">
       <button class="tab active" data-skill="fishing">Fishing</button>
       <button class="tab" data-skill="mining">Mining</button>
@@ -27,22 +26,18 @@
   </header>
 
   <main class="wrap">
-
     <!-- ================= Levels ================= -->
     <section class="panel">
       <h2 id="skillTitle">Fishing</h2>
-
       <div class="levels">
         <label class="field">
           <span id="currentLabel">Your Fishing Level</span>
           <input id="currentLevel" type="number" min="1" max="120" value="1" inputmode="numeric" />
         </label>
-
         <label class="field">
           <span id="targetLabel">Target Fishing Level</span>
           <input id="targetLevel" type="number" min="1" max="120" value="5" inputmode="numeric" />
         </label>
-
         <label class="field">
           <span id="currentXPLabel">Current XP % (0–100)</span>
           <input id="currentXP" type="number" min="0" max="100" value="0" inputmode="numeric" />
@@ -52,7 +47,6 @@
 
     <!-- ================= Item Selection ================= -->
     <section class="panel">
-
       <!-- Alchemy sub-tabs -->
       <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Alchemy mode</div>
@@ -89,30 +83,26 @@
       <div class="subtle" id="selectHint">
         Select an item (locked until you reach the required level)
       </div>
-
       <div id="itemButtons" class="grid"></div>
     </section>
 
     <!-- ================= Boosts ================= -->
     <section class="panel">
       <div class="boosts">
-
         <label class="toggle">
           <input id="worldBoost" type="checkbox" />
           World Boost (+50%)
         </label>
-
         <label class="toggle">
           <input id="bonusStars" type="checkbox" />
           Bonus XP Stars (x2)
         </label>
-
         <label class="toggle">
           <input id="wisdomRelic" type="checkbox" />
           <span id="relicName">Wisdom Relic</span> (+5%)
         </label>
 
-        <!-- ✅ Smithing-only boosts -->
+        <!-- Smithing-only boosts -->
         <div id="smithingInfernalBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="infernalHammer" type="checkbox" />
@@ -124,7 +114,7 @@
           </label>
         </div>
 
-        <!-- ✅ Mining-only boost -->
+        <!-- Mining-only boost -->
         <div id="miningProspectorBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="prospectorsNeck" type="checkbox" />
@@ -148,7 +138,6 @@
             Tier 4 set (+12%)
           </label>
         </div>
-
       </div>
     </section>
 
@@ -156,14 +145,19 @@
     <section class="panel">
       <p id="chosen" class="chosen"></p>
       <p id="result" class="result"></p>
-
       <div id="materialsBox" class="materials hidden">
         <div class="subtle" id="materialsTitle">Total materials needed</div>
         <div id="materialsList" class="mat-list"></div>
       </div>
     </section>
-
   </main>
+
+  <!-- ================= Support Link ================= -->
+  <footer class="support-footer">
+    <a href="https://buymeacoffee.com/ak1731" target="_blank" rel="noopener noreferrer">
+      ☕ Support link if u want to donate <3
+    </a>
+  </footer>
 
   <!-- Scripts -->
   <script src="./data.js"></script>
