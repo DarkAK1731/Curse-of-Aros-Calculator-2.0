@@ -200,3 +200,25 @@ input[type="number"]:focus{
   .levels{ grid-template-columns: 1fr; }
   input[type="number"]{ max-width:none; }
 }
+
+/* Buy Me a Coffee footer */
+.support-footer{
+  margin: 6px auto 24px;   /* moves it UP a bit */
+  text-align: center;
+  font-size: 15px;        /* slightly larger */
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.support-footer a{
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.support-footer a:hover{
+  color: var(--text);
+  text-decoration: underline;
+}
