@@ -7,9 +7,11 @@
   <title>COA Calculator 2.0 by AK1731</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <header class="top">
     <h1>Curse of Aros Calculator 2.0 by AK1731</h1>
+
     <nav class="tabs" aria-label="Skills">
       <button class="tab active" data-skill="fishing">Fishing</button>
       <button class="tab" data-skill="mining">Mining</button>
@@ -18,14 +20,18 @@
       <button class="tab" data-skill="cooking">Cooking</button>
       <button class="tab" data-skill="crafting">Crafting</button>
       <button class="tab" data-skill="alchemy">Alchemy</button>
+      <button class="tab" data-skill="smithing">Smithing</button>
       <button class="tab" data-skill="melee">Melee</button>
       <button class="tab" data-skill="mage">Mage</button>
     </nav>
   </header>
 
   <main class="wrap">
+
+    <!-- ================= Levels ================= -->
     <section class="panel">
       <h2 id="skillTitle">Fishing</h2>
+
       <div class="levels">
         <label class="field">
           <span id="currentLabel">Your Fishing Level</span>
@@ -44,19 +50,58 @@
       </div>
     </section>
 
+    <!-- ================= Item Selection ================= -->
     <section class="panel">
-      <div class="subtle" id="selectHint">Select an item (locked until you reach the required level)</div>
+
+      <!-- Alchemy sub-tabs -->
+      <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
+        <div class="subtle">Alchemy mode</div>
+        <label class="toggle">
+          <input type="radio" name="alchemyMode" value="gather_only" checked />
+          Gather Only (Plants)
+        </label>
+        <label class="toggle">
+          <input type="radio" name="alchemyMode" value="brew_only" />
+          Brew Only (Potions / Brews)
+        </label>
+      </div>
+
+      <!-- Smithing mode -->
+      <div id="smithingModeBox" class="boosts" style="display:none; margin-bottom:10px;">
+        <div class="subtle">Smithing mode</div>
+        <label class="toggle">
+          <input type="radio" name="smithingMode" value="smelt" checked />
+          Smelt Bars
+        </label>
+        <label class="toggle">
+          <input type="radio" name="smithingMode" value="forge" />
+          Forge Equipment
+        </label>
+      </div>
+
+      <!-- Smithing forge bar tabs -->
+      <div id="smithingBarBox" class="boosts" style="display:none; margin-bottom:10px;">
+        <div class="subtle">Forge category</div>
+        <div id="smithingBarTabs" class="grid"
+             style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));"></div>
+      </div>
+
+      <div class="subtle" id="selectHint">
+        Select an item (locked until you reach the required level)
+      </div>
+
       <div id="itemButtons" class="grid"></div>
     </section>
 
+    <!-- ================= Boosts ================= -->
     <section class="panel">
       <div class="boosts">
+
         <label class="toggle">
           <input id="worldBoost" type="checkbox" />
           World Boost (+50%)
         </label>
 
-        <!-- ✅ NEW: Bonus XP Stars -->
         <label class="toggle">
           <input id="bonusStars" type="checkbox" />
           Bonus XP Stars (x2)
@@ -67,8 +112,29 @@
           <span id="relicName">Wisdom Relic</span> (+5%)
         </label>
 
+        <!-- ✅ Smithing-only boosts -->
+        <div id="smithingInfernalBox" style="display:none; margin-top:6px;">
+          <label class="toggle">
+            <input id="infernalHammer" type="checkbox" />
+            Infernal Hammer (+4%)
+          </label>
+          <label class="toggle">
+            <input id="infernalRing" type="checkbox" />
+            Infernal Ring (+4%)
+          </label>
+        </div>
+
+        <!-- ✅ Mining-only boost -->
+        <div id="miningProspectorBox" style="display:none; margin-top:6px;">
+          <label class="toggle">
+            <input id="prospectorsNeck" type="checkbox" />
+            Prospector's Neck (+5%)
+          </label>
+        </div>
+
+        <!-- Set bonus -->
         <div id="setBonusBox">
-          <div class="subtle" style="margin-top:10px;">Set bonus (choose one)</div>
+          <div class="subtle" style="margin-top:10px;">Set bonus</div>
           <label class="toggle">
             <input type="radio" name="setBonus" value="1" checked />
             None
@@ -82,9 +148,11 @@
             Tier 4 set (+12%)
           </label>
         </div>
+
       </div>
     </section>
 
+    <!-- ================= Results ================= -->
     <section class="panel">
       <p id="chosen" class="chosen"></p>
       <p id="result" class="result"></p>
@@ -94,8 +162,10 @@
         <div id="materialsList" class="mat-list"></div>
       </div>
     </section>
+
   </main>
 
+  <!-- Scripts -->
   <script src="./data.js"></script>
   <script src="./script.js"></script>
 </body>
