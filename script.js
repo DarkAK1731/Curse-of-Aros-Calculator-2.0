@@ -1,8 +1,9 @@
 // script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge
 // ✅ Icons supported:
-//    - Crafting: ./Icons/Crafting/*.png
-//    - Mining:   ./Icons/Mining/*.png
-//    - Fishing:  ./Icons/Fishing/*.png
+//    - Crafting:    ./Icons/Crafting/*.png
+//    - Mining:      ./Icons/Mining/*.png
+//    - Fishing:     ./Icons/Fishing/*.png
+//    - Woodcutting: ./Icons/Woodcutting/*.png
 
 // ---------- State ----------
 let activeSkillKey = "fishing";
@@ -43,7 +44,6 @@ const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
-
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
 
@@ -125,11 +125,31 @@ const FISHING_ICON_MAP = {
   tuna: "./Icons/Fishing/Tuna.png",
 };
 
+// Woodcutting icons (matches your screenshot names)
+const WOODCUTTING_ICON_MAP = {
+  pine: "./Icons/Woodcutting/Pine_Logs.png",
+  dead: "./Icons/Woodcutting/Dead_Logs.png",
+  birch: "./Icons/Woodcutting/Birch_Logs.png",
+  applewood: "./Icons/Woodcutting/Applewood.png",
+  willow: "./Icons/Woodcutting/Willow_Logs.png",
+  oak: "./Icons/Woodcutting/Oak_Logs.png",
+  chestnut: "./Icons/Woodcutting/Chestnut_Logs.png",
+  maple: "./Icons/Woodcutting/Maple_Logs.png",
+  olive: "./Icons/Woodcutting/Olive_Logs.png",
+  stinkwood: "./Icons/Woodcutting/Stinkwood.png",
+  magic: "./Icons/Woodcutting/Magic_Log.png",
+  palm: "./Icons/Woodcutting/Palm_Wood.png",
+  ironbark: "./Icons/Woodcutting/Ironbark.png",
+  pearwood: "./Icons/Woodcutting/Pearwood.png",
+  limewood: "./Icons/Woodcutting/Lime_Wood.png",
+};
+
 // ONE correct icon resolver (no early returns)
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
   if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
   if (skillKey === "fishing") return FISHING_ICON_MAP[itemKey] || "";
+  if (skillKey === "woodcutting") return WOODCUTTING_ICON_MAP[itemKey] || "";
   return "";
 }
 
@@ -305,6 +325,7 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
+
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -475,7 +496,6 @@ function renderButtons() {
     btn.className = "item-btn";
 
     const iconPath = getIconPathForItem(activeSkillKey, it.key);
-
     if (iconPath) {
       const img = document.createElement("img");
       img.className = "btn-icon";
@@ -593,6 +613,7 @@ function calculate() {
   const curBase = levelXP[current];
   const nextBase = current < 120 ? levelXP[current + 1] : levelXP[120];
   const toNext = current < 120 ? nextBase - curBase : 0;
+
   const xpIntoLevel = current >= 120 ? 0 : Math.floor(toNext * (pct / 100));
   const currentTotalXP = curBase + xpIntoLevel;
 
@@ -612,7 +633,6 @@ function calculate() {
   }
 
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
-
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
 
@@ -654,6 +674,7 @@ function calculate() {
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
+      // direct bar requirements
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, mat.qty * actionsNeeded);
 
@@ -663,6 +684,7 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
+      // ores needed to smelt those bars (1-step)
       const oreTotals = new Map();
       for (const mat of req) {
         expandOneStep(smeltRecipeMap, mat.name, mat.qty * actionsNeeded, oreTotals);
@@ -670,7 +692,6 @@ function calculate() {
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
-
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
@@ -681,14 +702,15 @@ function calculate() {
       return;
     }
 
+    // smelting mode
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
     addMaterialRow("Total smelts", actionsNeeded);
 
     const smeltList = getItems();
     const recipeMap = buildRecipeMap(smeltList);
-
     const totals = new Map();
+
     if (Array.isArray(item.materials) && item.materials.length > 0) {
       for (const mat of item.materials) {
         expandMaterials(recipeMap, mat.name, mat.qty * actionsNeeded, totals);
