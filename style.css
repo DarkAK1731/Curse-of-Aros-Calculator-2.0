@@ -14,6 +14,7 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
@@ -57,7 +58,6 @@ h1{
   cursor:pointer;
   transition:.18s ease;
 }
-
 .tab:hover{ background:rgba(255,255,255,.06); }
 .tab.active{
   border-color:rgba(59,130,246,.55);
@@ -125,6 +125,7 @@ input[type="number"]:focus{
   gap:10px;
 }
 
+/* button base */
 .item-btn{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.04);
@@ -134,6 +135,11 @@ input[type="number"]:focus{
   cursor:pointer;
   transition:.15s ease;
   user-select:none;
+
+  /* ✅ icon layout */
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
 }
 
 .item-btn:hover{
@@ -203,13 +209,12 @@ input[type="number"]:focus{
 
 /* Buy Me a Coffee footer */
 .support-footer{
-  margin: 6px auto 24px;   /* moves it UP a bit */
+  margin: 6px auto 24px;
   text-align: center;
-  font-size: 15px;        /* slightly larger */
+  font-size: 15px;
   font-weight: 600;
   opacity: 0.9;
 }
-
 .support-footer a{
   color: var(--muted);
   text-decoration: none;
@@ -217,8 +222,19 @@ input[type="number"]:focus{
   align-items: center;
   gap: 6px;
 }
-
 .support-footer a:hover{
   color: var(--text);
   text-decoration: underline;
+}
+
+/* ---- Item button icons ---- */
+.btn-icon{
+  width:22px;
+  height:22px;
+  flex:0 0 22px;
+  image-rendering: pixelated; /* keeps pixel-art sharp */
+}
+
+.btn-text{
+  line-height:1;
 }
