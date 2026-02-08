@@ -4,14 +4,14 @@
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-
+//    - Tailoring:   ./Icons/Tailoring/*.png   (your Spellbinding)
+//    - Cooking:     ./Icons/Cooking/*.png
+//    - Alchemy:     ./Icons/Alchemy/*.png     (AUTO by item.name -> filename)
 // ---------- State ----------
 let activeSkillKey = "fishing";
 let selectedItemKey = skills[activeSkillKey].items[0].key;
-
 // Alchemy (2 modes)
 let alchemyMode = "gather_only"; // gather_only | brew_only
-
 // Smithing (2 modes)
 let smithingMode = "smelt"; // smelt | forge
 let smithingBarKey = "bronze"; // bronze|iron|steel|crimsteel|silver|gold|mythan|cobalt|varaxite|magic|other
@@ -46,7 +46,6 @@ const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
-
 const alchemyModeBox = document.getElementById("alchemyModeBox");
 const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
@@ -60,7 +59,6 @@ const INFERNAL_MULT = 1.04;
 const PROSPECTORS_NECK_MULT = 1.05;
 
 // ---------- ICON MAPS ----------
-
 // Crafting icons (matches your filenames)
 const CRAFTING_ICON_MAP = {
   relic_accuracy: "./Icons/Crafting/Accuracy_Relic.png",
@@ -81,8 +79,7 @@ const CRAFTING_ICON_MAP = {
   relic_wisdom: "./Icons/Crafting/Wisdom_Relic.png",
 };
 
-// Mining icons (matches your screenshot names EXACTLY)
-// NOTE: your file is "Pink_salt.png" (lowercase s) so map must match that.
+// Mining icons (NOTE: your file is "Pink_salt.png" (lowercase s) so map must match that.)
 const MINING_ICON_MAP = {
   black_salt: "./Icons/Mining/Black_Salt.png",
   coal: "./Icons/Mining/Coal.png",
@@ -103,7 +100,7 @@ const MINING_ICON_MAP = {
   varaxium: "./Icons/Mining/Varaxium.png",
 };
 
-// Fishing icons (matches your screenshot names)
+// Fishing icons
 const FISHING_ICON_MAP = {
   anchovies: "./Icons/Fishing/Anchovies.png",
   anglerfish: "./Icons/Fishing/Anglerfish.png",
@@ -125,7 +122,7 @@ const FISHING_ICON_MAP = {
   tuna: "./Icons/Fishing/Tuna.png",
 };
 
-// Woodcutting icons (matches your screenshot names)
+// Woodcutting icons
 const WOODCUTTING_ICON_MAP = {
   pine: "./Icons/Woodcutting/Pine_Logs.png",
   dead: "./Icons/Woodcutting/Dead_Logs.png",
@@ -144,19 +141,86 @@ const WOODCUTTING_ICON_MAP = {
   limewood: "./Icons/Woodcutting/Lime_Wood.png",
 };
 
+// Tailoring / Spellbinding icons
+const TAILORING_ICON_MAP = {
+  blizzard_tome: "./Icons/Tailoring/Blizzard_Tome.png",
+  book: "./Icons/Tailoring/Book.png",
+  consume_tome: "./Icons/Tailoring/Consume_Tome.png",
+  curse_tome: "./Icons/Tailoring/Curse_Tome.png",
+  drain_tome: "./Icons/Tailoring/Drain_Tome.png",
+  ember_tome: "./Icons/Tailoring/Ember_Tome.png",
+  freeze_tome: "./Icons/Tailoring/Freeze_Tome.png",
+  haunt_tome: "./Icons/Tailoring/Haunt_Tome.png",
+  icicle_tome: "./Icons/Tailoring/Icicle_Tome.png",
+  ignite_tome: "./Icons/Tailoring/Ignite_Tome.png",
+  inferno_tome: "./Icons/Tailoring/Inferno_Tome.png",
+  leech_tome: "./Icons/Tailoring/Leech_Tome.png",
+  paper: "./Icons/Tailoring/Paper.png",
+  torture_tome: "./Icons/Tailoring/Torture_Tome.png",
+};
+
+// Cooking icons
+const COOKING_ICON_MAP = {
+  bear_roast: "./Icons/Cooking/Bear_Roast.png",
+  polar_bear_roast: "./Icons/Cooking/Polar_Bear_Roast.png",
+  cooked_anchovies: "./Icons/Cooking/Cooked_Anchovies.png",
+  cooked_anglerfish: "./Icons/Cooking/Cooked_Anglerfish.png",
+  cooked_bass: "./Icons/Cooking/Cooked_Bass.png",
+  cooked_eel: "./Icons/Cooking/Cooked_Eel.png",
+  cooked_giant_squid: "./Icons/Cooking/Cooked_Giant_Squid.png",
+  cooked_lobster: "./Icons/Cooking/Cooked_Lobster.png",
+  cooked_mackerel: "./Icons/Cooking/Cooked_Mackerel.png",
+  cooked_manta_ray: "./Icons/Cooking/Cooked_Manta_Ray.png",
+  cooked_orca: "./Icons/Cooking/Cooked_Orca.png",
+  cooked_sardine: "./Icons/Cooking/Cooked_Sardine.png",
+  cooked_sea_turtle: "./Icons/Cooking/Cooked_Sea_Turtle.png",
+  cooked_shark: "./Icons/Cooking/Cooked_Shark.png",
+  cooked_squid: "./Icons/Cooking/Cooked_Squid.png",
+  cooked_trout: "./Icons/Cooking/Cooked_Trout.png",
+  cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
+};
+
+// ✅ ALCHEMY: auto filename by item.name
+function alchemyNameToFilename(name) {
+  // Matches your screenshots:
+  // "Dance of the Undead" -> "Dance_of_the_Undead.png"
+  // "Dragon's Whisker" -> "Dragon's_Whisker.png"
+  return String(name || "").trim().replace(/ /g, "_") + ".png";
+}
+
+function getAlchemyItemNameByKey(itemKey) {
+  const a = skills.alchemy;
+  if (!a) return null;
+  const plants = Array.isArray(a.plants) ? a.plants : [];
+  const brews = Array.isArray(a.brews) ? a.brews : [];
+  const found =
+    plants.find(it => it.key === itemKey) ||
+    brews.find(it => it.key === itemKey);
+  return found ? found.name : null;
+}
+
 // ONE correct icon resolver (no early returns)
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
   if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
   if (skillKey === "fishing") return FISHING_ICON_MAP[itemKey] || "";
   if (skillKey === "woodcutting") return WOODCUTTING_ICON_MAP[itemKey] || "";
+  if (skillKey === "spellbinding") return TAILORING_ICON_MAP[itemKey] || "";
+  if (skillKey === "cooking") return COOKING_ICON_MAP[itemKey] || "";
+
+  // ✅ Alchemy auto path (no map needed)
+  if (skillKey === "alchemy") {
+    const name = getAlchemyItemNameByKey(itemKey);
+    if (!name) return "";
+    return "./Icons/Alchemy/" + alchemyNameToFilename(name);
+  }
+
   return "";
 }
 
 // ---------- Helpers ----------
 function clampLevel(n) { return Math.max(1, Math.min(120, Math.floor(n))); }
 function clampPercent(n) { return Math.max(0, Math.min(100, Math.floor(n))); }
-
 function readNumberInput(el) {
   const raw = (el.value ?? "").toString().trim();
   if (raw === "") return null;
@@ -164,35 +228,30 @@ function readNumberInput(el) {
   if (!Number.isFinite(n)) return null;
   return n;
 }
-
 function enforceLevelBoundsLive(el) {
   const n = readNumberInput(el);
   if (n === null) return;
   const fixed = clampLevel(n);
   if (Number(n) !== fixed) el.value = fixed;
 }
-
 function enforcePercentBoundsLive(el) {
   const n = readNumberInput(el);
   if (n === null) return;
   const fixed = clampPercent(n);
   if (Number(n) !== fixed) el.value = fixed;
 }
-
 function normalizeLevelInput(el) {
   const n = readNumberInput(el);
   const fixed = Number.isFinite(n) ? clampLevel(n) : 1;
   el.value = fixed;
   return fixed;
 }
-
 function normalizePercentInput(el) {
   const n = readNumberInput(el);
   const fixed = Number.isFinite(n) ? clampPercent(n) : 0;
   el.value = fixed;
   return fixed;
 }
-
 function fmt(n) { return Number(n).toLocaleString(); }
 
 // ---------- Multipliers ----------
@@ -200,7 +259,6 @@ function getSetMultiplier() {
   const selected = document.querySelector('input[name="setBonus"]:checked');
   return selected ? Number(selected.value) : 1;
 }
-
 function getTotalMultiplier() {
   const stars = bonusStarsInput && bonusStarsInput.checked ? STARS_MULT : 1;
   const world = worldBoostInput.checked ? WORLD_MULT : 1;
@@ -224,7 +282,6 @@ function getTotalMultiplier() {
   if (activeSkillKey === "melee" || activeSkillKey === "mage") {
     return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck;
   }
-
   const set = getSetMultiplier();
   return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck * set;
 }
@@ -251,7 +308,6 @@ function getSmithingForgeBarKey(it) {
   const mats = Array.isArray(it.materials) ? it.materials : [];
   const matNames = mats.map(m => (m?.name || "").toLowerCase());
   const has = (txt) => matNames.some(n => n.includes(txt));
-
   if (has("bronze bar")) return "bronze";
   if (has("iron bar")) return "iron";
   if (has("crimsteel bar")) return "crimsteel";
@@ -262,13 +318,11 @@ function getSmithingForgeBarKey(it) {
   if (has("cobalt bar")) return "cobalt";
   if (has("varaxite bar")) return "varaxite";
   if (has("magic bar")) return "magic";
-
   const nm = (it.name || "").toLowerCase();
   if (nm.includes("bronze")) return "bronze";
   if (nm.includes("iron")) return "iron";
   if (nm.includes("crimsteel")) return "crimsteel";
   if (nm.includes("steel")) return "steel";
-
   if (
     nm.includes("sapphire") || nm.includes("ruby") || nm.includes("emerald") ||
     nm.includes("arosite") || nm.includes("magnetite") || nm.includes("battle necklace") || nm.includes("ring")
@@ -276,7 +330,6 @@ function getSmithingForgeBarKey(it) {
     if (has("silver")) return "silver";
     if (has("gold")) return "gold";
   }
-
   return "other";
 }
 
@@ -303,12 +356,10 @@ function getSmithingForgeItemsAll() {
   const all = (s && s.items) ? s.items : [];
   return all.filter((it) => !isSmithingSmeltItem(it));
 }
-
 function getSmithingForgeItemsForBar(barKey) {
   const allForge = getSmithingForgeItemsAll();
   return allForge.filter((it) => getSmithingForgeBarKey(it) === barKey);
 }
-
 function getSmithingAvailableBarKeys() {
   const allForge = getSmithingForgeItemsAll();
   const set = new Set(allForge.map(getSmithingForgeBarKey));
@@ -325,7 +376,6 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
-
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -357,11 +407,9 @@ function buildRecipeMap(items) {
   }
   return map;
 }
-
 function addCount(store, name, qty) {
   store.set(name, (store.get(name) || 0) + qty);
 }
-
 function expandMaterials(recipeMap, name, qty, out, depth = 0) {
   if (depth > 12) { addCount(out, name, qty); return; }
   const recipe = recipeMap.get(name);
@@ -370,7 +418,6 @@ function expandMaterials(recipeMap, name, qty, out, depth = 0) {
     expandMaterials(recipeMap, mat.name, mat.qty * qty, out, depth + 1);
   }
 }
-
 function expandOneStep(recipeMap, name, qty, out) {
   const recipe = recipeMap.get(name);
   if (!recipe) return false;
@@ -398,7 +445,6 @@ function renderSmithingBarTabs() {
     btn.className = "item-btn";
     btn.textContent = SMITHING_BAR_LABELS[barKey] || barKey;
     if (barKey === smithingBarKey) btn.classList.add("active");
-
     btn.addEventListener("click", () => {
       smithingBarKey = barKey;
       const list = getItems();
@@ -407,7 +453,6 @@ function renderSmithingBarTabs() {
       renderButtons();
       calculate();
     });
-
     smithingBarTabs.appendChild(btn);
   }
 }
@@ -501,7 +546,6 @@ function renderButtons() {
       img.className = "btn-icon";
       img.src = iconPath;
       img.alt = "";
-
       img.onerror = () => {
         img.remove();
         if (!btn.querySelector(".btn-text")) {
@@ -542,13 +586,10 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
-
   const left = document.createElement("b");
   left.textContent = name;
-
   const right = document.createElement("span");
   right.textContent = fmt(qty);
-
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -557,13 +598,10 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
-
   const left = document.createElement("b");
   left.textContent = title;
-
   const right = document.createElement("span");
   right.textContent = "";
-
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -633,6 +671,7 @@ function calculate() {
   }
 
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
+
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
 
@@ -674,7 +713,6 @@ function calculate() {
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
-      // direct bar requirements
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, mat.qty * actionsNeeded);
 
@@ -684,7 +722,6 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
-      // ores needed to smelt those bars (1-step)
       const oreTotals = new Map();
       for (const mat of req) {
         expandOneStep(smeltRecipeMap, mat.name, mat.qty * actionsNeeded, oreTotals);
@@ -695,14 +732,11 @@ function calculate() {
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
-
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
-
       return;
     }
 
-    // smelting mode
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
     addMaterialRow("Total smelts", actionsNeeded);
@@ -786,7 +820,6 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
-
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -796,11 +829,9 @@ tabs.forEach((btn) => {
 
     renderTabs();
     renderHeader();
-
     currentLevelInput.value = 1;
     targetLevelInput.value = 5;
     currentXPInput.value = 0;
-
     renderButtons();
     calculate();
   });
@@ -811,12 +842,10 @@ currentLevelInput.addEventListener("input", () => {
   renderButtons();
   calculate();
 });
-
 targetLevelInput.addEventListener("input", () => {
   enforceLevelBoundsLive(targetLevelInput);
   calculate();
 });
-
 currentXPInput.addEventListener("input", () => {
   enforcePercentBoundsLive(currentXPInput);
   calculate();
@@ -827,12 +856,10 @@ currentLevelInput.addEventListener("blur", () => {
   renderButtons();
   calculate();
 });
-
 targetLevelInput.addEventListener("blur", () => {
   normalizeLevelInput(targetLevelInput);
   calculate();
 });
-
 currentXPInput.addEventListener("blur", () => {
   normalizePercentInput(currentXPInput);
   calculate();
@@ -841,7 +868,6 @@ currentXPInput.addEventListener("blur", () => {
 worldBoostInput.addEventListener("change", calculate);
 if (bonusStarsInput) bonusStarsInput.addEventListener("change", calculate);
 wisdomRelicInput.addEventListener("change", calculate);
-
 if (infernalHammerInput) infernalHammerInput.addEventListener("change", calculate);
 if (infernalRingInput) infernalRingInput.addEventListener("change", calculate);
 if (prospectorsNeckInput) prospectorsNeckInput.addEventListener("change", calculate);
