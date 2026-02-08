@@ -67,7 +67,7 @@ const skills = {
       { key:"cobalt",     name:"Cobalt Ore",     level:60,  xp:1200, meta:{ tool:"Pickaxe" } },
       { key:"varaxium",   name:"Varaxium",       level:70,  xp:1800, meta:{ tool:"Pickaxe" } },
       { key:"black_salt", name:"Black Salt",     level:75,  xp:2500, meta:{ tool:"Pickaxe" } },
-      { key:"magic_ore",      name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
+      { key:"magic_ore",  name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
       { key:"naturite",   name:"Naturite",       level:85,  xp:7500, meta:{ tool:"Pickaxe" } },
       { key:"obsidian",   name:"Obsidian",       level:90,  xp:9000, meta:{ tool:"Pickaxe" } },
     ]
