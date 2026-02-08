@@ -1,5 +1,8 @@
 // script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge
-// ✅ Crafting relic icons from ./Icons/Crafting/*.png (matches your folder layout)
+// ✅ Icons supported:
+//    - Crafting: ./Icons/Crafting/*.png
+//    - Mining:   ./Icons/Mining/*.png
+//    - Fishing:  ./Icons/Fishing/*.png
 
 // ---------- State ----------
 let activeSkillKey = "fishing";
@@ -19,14 +22,11 @@ const currentLabel = document.getElementById("currentLabel");
 const targetLabel = document.getElementById("targetLabel");
 const selectHint = document.getElementById("selectHint");
 const itemButtonsDiv = document.getElementById("itemButtons");
-
 const currentLevelInput = document.getElementById("currentLevel");
 const targetLevelInput = document.getElementById("targetLevel");
 const currentXPInput = document.getElementById("currentXP");
-
 const chosenP = document.getElementById("chosen");
 const resultP = document.getElementById("result");
-
 const worldBoostInput = document.getElementById("worldBoost");
 const bonusStarsInput = document.getElementById("bonusStars");
 const wisdomRelicInput = document.getElementById("wisdomRelic");
@@ -56,34 +56,80 @@ const smithingBarTabs = document.getElementById("smithingBarTabs");
 const RELIC_MULT = 1.049925925925926; // ~ +4.99259259%
 const WORLD_MULT = 1.5;
 const STARS_MULT = 2;
-
 const INFERNAL_MULT = 1.04;
 const PROSPECTORS_NECK_MULT = 1.05;
 
 // ---------- ICON MAPS ----------
-// Your folder layout is Icons/Crafting/... so paths MUST include "/Crafting/"
 
+// Crafting icons (matches your filenames)
 const CRAFTING_ICON_MAP = {
   relic_accuracy: "./Icons/Crafting/Accuracy_Relic.png",
+  relic_affliction: "./Icons/Crafting/Affliction_Relic.png",
+  cursed_relic: "./Icons/Crafting/Cursed_Relic.png",
+  relic_damage: "./Icons/Crafting/Damage_Relic.png",
+  relic_efficiency: "./Icons/Crafting/Efficiency_Relic.png",
+  relic_experience: "./Icons/Crafting/Experience_Relic.png",
+  relic_fire: "./Icons/Crafting/Fire_Relic.png",
   relic_guarding: "./Icons/Crafting/Guarding_Relic.png",
   relic_healing: "./Icons/Crafting/Healing_Relic.png",
-  relic_wealth: "./Icons/Crafting/Wealth_Relic.png",
-  relic_power: "./Icons/Crafting/Power_Relic.png",
-  relic_nature: "./Icons/Crafting/Nature_Relic.png",
-  relic_fire: "./Icons/Crafting/Fire_Relic.png",
-  relic_damage: "./Icons/Crafting/Damage_Relic.png",
-  relic_leeching: "./Icons/Crafting/Leeching_Relic.png",
-  relic_experience: "./Icons/Crafting/Experience_Relic.png",
-  relic_wisdom: "./Icons/Crafting/Wisdom_Relic.png",
   ice_relic: "./Icons/Crafting/Ice_Relic.png",
-  cursed_relic: "./Icons/Crafting/Cursed_Relic.png",
-  relic_efficiency: "./Icons/Crafting/Efficiency_Relic.png",
+  relic_leeching: "./Icons/Crafting/Leeching_Relic.png",
+  relic_nature: "./Icons/Crafting/Nature_Relic.png",
+  relic_power: "./Icons/Crafting/Power_Relic.png",
   relic_unbroken: "./Icons/Crafting/Unbroken_Relic.png",
-  relic_affliction: "./Icons/Crafting/Affliction_Relic.png",
+  relic_wealth: "./Icons/Crafting/Wealth_Relic.png",
+  relic_wisdom: "./Icons/Crafting/Wisdom_Relic.png",
 };
 
+// Mining icons (matches your screenshot names EXACTLY)
+// NOTE: your file is "Pink_salt.png" (lowercase s) so map must match that.
+const MINING_ICON_MAP = {
+  black_salt: "./Icons/Mining/Black_Salt.png",
+  coal: "./Icons/Mining/Coal.png",
+  cobalt: "./Icons/Mining/Cobalt_Ore.png",
+  copper: "./Icons/Mining/Copper_Ore.png",
+  crimsteel: "./Icons/Mining/Crimsteel_Ore.png",
+  gold: "./Icons/Mining/Gold_Ore.png",
+  iron: "./Icons/Mining/Iron_Ore.png",
+  magic_ore: "./Icons/Mining/Magic_Ore.png",
+  mythan: "./Icons/Mining/Mythan_Ore.png",
+  naturite: "./Icons/Mining/Naturite.png",
+  obsidian: "./Icons/Mining/Obsidian.png",
+  pink_salt: "./Icons/Mining/Pink_salt.png",
+  salt: "./Icons/Mining/Salt.png",
+  sandstone: "./Icons/Mining/Sandstone.png",
+  silver: "./Icons/Mining/Silver_Ore.png",
+  tin: "./Icons/Mining/Tin_Ore.png",
+  varaxium: "./Icons/Mining/Varaxium.png",
+};
+
+// Fishing icons (matches your screenshot names)
+const FISHING_ICON_MAP = {
+  anchovies: "./Icons/Fishing/Anchovies.png",
+  anglerfish: "./Icons/Fishing/Anglerfish.png",
+  bass: "./Icons/Fishing/Bass.png",
+  eel: "./Icons/Fishing/Eel.png",
+  giant_squid: "./Icons/Fishing/Giant_Squid.png",
+  goldfish: "./Icons/Fishing/Goldfish.png",
+  herringbone: "./Icons/Fishing/Herringbone.png",
+  jellyfish: "./Icons/Fishing/Jellyfish.png",
+  lobster: "./Icons/Fishing/Lobster.png",
+  mackerel: "./Icons/Fishing/Mackerel.png",
+  manta_ray: "./Icons/Fishing/Manta_Ray.png",
+  orca: "./Icons/Fishing/Orca.png",
+  sardine: "./Icons/Fishing/Sardine.png",
+  sea_turtle: "./Icons/Fishing/Sea_Turtle.png",
+  shark: "./Icons/Fishing/Shark.png",
+  squid: "./Icons/Fishing/Squid.png",
+  trout: "./Icons/Fishing/Trout.png",
+  tuna: "./Icons/Fishing/Tuna.png",
+};
+
+// ONE correct icon resolver (no early returns)
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
+  if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
+  if (skillKey === "fishing") return FISHING_ICON_MAP[itemKey] || "";
   return "";
 }
 
@@ -259,7 +305,6 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
-
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -477,10 +522,13 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = name;
+
   const right = document.createElement("span");
   right.textContent = fmt(qty);
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -489,10 +537,13 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = title;
+
   const right = document.createElement("span");
   right.textContent = "";
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -511,6 +562,7 @@ function calculate() {
   }
 
   const item = getSelectedItem();
+
   const rawCurrent = readNumberInput(currentLevelInput);
   const rawTarget = readNumberInput(targetLevelInput);
   const rawPct = readNumberInput(currentXPInput);
@@ -599,6 +651,7 @@ function calculate() {
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
+
       const req = Array.isArray(item.materials) ? item.materials : [];
 
       const directTotals = new Map();
@@ -634,8 +687,8 @@ function calculate() {
 
     const smeltList = getItems();
     const recipeMap = buildRecipeMap(smeltList);
-    const totals = new Map();
 
+    const totals = new Map();
     if (Array.isArray(item.materials) && item.materials.length > 0) {
       for (const mat of item.materials) {
         expandMaterials(recipeMap, mat.name, mat.qty * actionsNeeded, totals);
@@ -711,6 +764,7 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
+
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
