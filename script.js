@@ -4,14 +4,18 @@
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png   (your Spellbinding)
+//    - Tailoring:   ./Icons/Tailoring/*.png
 //    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png     (AUTO by item.name -> filename)
+//    - Alchemy:     ./Icons/Alchemy/*.png
+//    - Smithing:    ./Icons/Smithing/*.png
+
 // ---------- State ----------
 let activeSkillKey = "fishing";
 let selectedItemKey = skills[activeSkillKey].items[0].key;
+
 // Alchemy (2 modes)
 let alchemyMode = "gather_only"; // gather_only | brew_only
+
 // Smithing (2 modes)
 let smithingMode = "smelt"; // smelt | forge
 let smithingBarKey = "bronze"; // bronze|iron|steel|crimsteel|silver|gold|mythan|cobalt|varaxite|magic|other
@@ -46,6 +50,7 @@ const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
+
 const alchemyModeBox = document.getElementById("alchemyModeBox");
 const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
@@ -59,7 +64,7 @@ const INFERNAL_MULT = 1.04;
 const PROSPECTORS_NECK_MULT = 1.05;
 
 // ---------- ICON MAPS ----------
-// Crafting icons (matches your filenames)
+// Crafting icons
 const CRAFTING_ICON_MAP = {
   relic_accuracy: "./Icons/Crafting/Accuracy_Relic.png",
   relic_affliction: "./Icons/Crafting/Affliction_Relic.png",
@@ -79,7 +84,7 @@ const CRAFTING_ICON_MAP = {
   relic_wisdom: "./Icons/Crafting/Wisdom_Relic.png",
 };
 
-// Mining icons (NOTE: your file is "Pink_salt.png" (lowercase s) so map must match that.)
+// Mining icons
 const MINING_ICON_MAP = {
   black_salt: "./Icons/Mining/Black_Salt.png",
   coal: "./Icons/Mining/Coal.png",
@@ -180,26 +185,27 @@ const COOKING_ICON_MAP = {
   cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
 };
 
-// ✅ ALCHEMY: auto filename by item.name
-function alchemyNameToFilename(name) {
-  // Matches your screenshots:
-  // "Dance of the Undead" -> "Dance_of_the_Undead.png"
-  // "Dragon's Whisker" -> "Dragon's_Whisker.png"
+// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing)
+function nameToFilename(name) {
   return String(name || "").trim().replace(/ /g, "_") + ".png";
 }
 
-function getAlchemyItemNameByKey(itemKey) {
-  const a = skills.alchemy;
-  if (!a) return null;
-  const plants = Array.isArray(a.plants) ? a.plants : [];
-  const brews = Array.isArray(a.brews) ? a.brews : [];
-  const found =
-    plants.find(it => it.key === itemKey) ||
-    brews.find(it => it.key === itemKey);
+function getSkillItemNameByKey(skillKey, itemKey) {
+  const s = skills[skillKey];
+  if (!s) return null;
+
+  if (skillKey === "alchemy") {
+    const plants = Array.isArray(s.plants) ? s.plants : [];
+    const brews = Array.isArray(s.brews) ? s.brews : [];
+    const found = plants.find(it => it.key === itemKey) || brews.find(it => it.key === itemKey);
+    return found ? found.name : null;
+  }
+
+  const items = Array.isArray(s.items) ? s.items : [];
+  const found = items.find(it => it.key === itemKey);
   return found ? found.name : null;
 }
 
-// ONE correct icon resolver (no early returns)
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
   if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
@@ -208,11 +214,18 @@ function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "spellbinding") return TAILORING_ICON_MAP[itemKey] || "";
   if (skillKey === "cooking") return COOKING_ICON_MAP[itemKey] || "";
 
-  // ✅ Alchemy auto path (no map needed)
+  // Alchemy auto path
   if (skillKey === "alchemy") {
-    const name = getAlchemyItemNameByKey(itemKey);
+    const name = getSkillItemNameByKey("alchemy", itemKey);
     if (!name) return "";
-    return "./Icons/Alchemy/" + alchemyNameToFilename(name);
+    return "./Icons/Alchemy/" + nameToFilename(name);
+  }
+
+  // Smithing auto path
+  if (skillKey === "smithing") {
+    const name = getSkillItemNameByKey("smithing", itemKey);
+    if (!name) return "";
+    return "./Icons/Smithing/" + nameToFilename(name);
   }
 
   return "";
@@ -221,6 +234,7 @@ function getIconPathForItem(skillKey, itemKey) {
 // ---------- Helpers ----------
 function clampLevel(n) { return Math.max(1, Math.min(120, Math.floor(n))); }
 function clampPercent(n) { return Math.max(0, Math.min(100, Math.floor(n))); }
+
 function readNumberInput(el) {
   const raw = (el.value ?? "").toString().trim();
   if (raw === "") return null;
@@ -228,30 +242,35 @@ function readNumberInput(el) {
   if (!Number.isFinite(n)) return null;
   return n;
 }
+
 function enforceLevelBoundsLive(el) {
   const n = readNumberInput(el);
   if (n === null) return;
   const fixed = clampLevel(n);
   if (Number(n) !== fixed) el.value = fixed;
 }
+
 function enforcePercentBoundsLive(el) {
   const n = readNumberInput(el);
   if (n === null) return;
   const fixed = clampPercent(n);
   if (Number(n) !== fixed) el.value = fixed;
 }
+
 function normalizeLevelInput(el) {
   const n = readNumberInput(el);
   const fixed = Number.isFinite(n) ? clampLevel(n) : 1;
   el.value = fixed;
   return fixed;
 }
+
 function normalizePercentInput(el) {
   const n = readNumberInput(el);
   const fixed = Number.isFinite(n) ? clampPercent(n) : 0;
   el.value = fixed;
   return fixed;
 }
+
 function fmt(n) { return Number(n).toLocaleString(); }
 
 // ---------- Multipliers ----------
@@ -259,6 +278,7 @@ function getSetMultiplier() {
   const selected = document.querySelector('input[name="setBonus"]:checked');
   return selected ? Number(selected.value) : 1;
 }
+
 function getTotalMultiplier() {
   const stars = bonusStarsInput && bonusStarsInput.checked ? STARS_MULT : 1;
   const world = worldBoostInput.checked ? WORLD_MULT : 1;
@@ -282,6 +302,7 @@ function getTotalMultiplier() {
   if (activeSkillKey === "melee" || activeSkillKey === "mage") {
     return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck;
   }
+
   const set = getSetMultiplier();
   return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck * set;
 }
@@ -308,6 +329,7 @@ function getSmithingForgeBarKey(it) {
   const mats = Array.isArray(it.materials) ? it.materials : [];
   const matNames = mats.map(m => (m?.name || "").toLowerCase());
   const has = (txt) => matNames.some(n => n.includes(txt));
+
   if (has("bronze bar")) return "bronze";
   if (has("iron bar")) return "iron";
   if (has("crimsteel bar")) return "crimsteel";
@@ -318,11 +340,13 @@ function getSmithingForgeBarKey(it) {
   if (has("cobalt bar")) return "cobalt";
   if (has("varaxite bar")) return "varaxite";
   if (has("magic bar")) return "magic";
+
   const nm = (it.name || "").toLowerCase();
   if (nm.includes("bronze")) return "bronze";
   if (nm.includes("iron")) return "iron";
   if (nm.includes("crimsteel")) return "crimsteel";
   if (nm.includes("steel")) return "steel";
+
   if (
     nm.includes("sapphire") || nm.includes("ruby") || nm.includes("emerald") ||
     nm.includes("arosite") || nm.includes("magnetite") || nm.includes("battle necklace") || nm.includes("ring")
@@ -330,6 +354,7 @@ function getSmithingForgeBarKey(it) {
     if (has("silver")) return "silver";
     if (has("gold")) return "gold";
   }
+
   return "other";
 }
 
@@ -356,10 +381,12 @@ function getSmithingForgeItemsAll() {
   const all = (s && s.items) ? s.items : [];
   return all.filter((it) => !isSmithingSmeltItem(it));
 }
+
 function getSmithingForgeItemsForBar(barKey) {
   const allForge = getSmithingForgeItemsAll();
   return allForge.filter((it) => getSmithingForgeBarKey(it) === barKey);
 }
+
 function getSmithingAvailableBarKeys() {
   const allForge = getSmithingForgeItemsAll();
   const set = new Set(allForge.map(getSmithingForgeBarKey));
@@ -376,6 +403,7 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
+
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -407,9 +435,11 @@ function buildRecipeMap(items) {
   }
   return map;
 }
+
 function addCount(store, name, qty) {
   store.set(name, (store.get(name) || 0) + qty);
 }
+
 function expandMaterials(recipeMap, name, qty, out, depth = 0) {
   if (depth > 12) { addCount(out, name, qty); return; }
   const recipe = recipeMap.get(name);
@@ -418,6 +448,7 @@ function expandMaterials(recipeMap, name, qty, out, depth = 0) {
     expandMaterials(recipeMap, mat.name, mat.qty * qty, out, depth + 1);
   }
 }
+
 function expandOneStep(recipeMap, name, qty, out) {
   const recipe = recipeMap.get(name);
   if (!recipe) return false;
@@ -445,6 +476,7 @@ function renderSmithingBarTabs() {
     btn.className = "item-btn";
     btn.textContent = SMITHING_BAR_LABELS[barKey] || barKey;
     if (barKey === smithingBarKey) btn.classList.add("active");
+
     btn.addEventListener("click", () => {
       smithingBarKey = barKey;
       const list = getItems();
@@ -453,6 +485,7 @@ function renderSmithingBarTabs() {
       renderButtons();
       calculate();
     });
+
     smithingBarTabs.appendChild(btn);
   }
 }
@@ -620,7 +653,6 @@ function calculate() {
   }
 
   const item = getSelectedItem();
-
   const rawCurrent = readNumberInput(currentLevelInput);
   const rawTarget = readNumberInput(targetLevelInput);
   const rawPct = readNumberInput(currentXPInput);
@@ -671,7 +703,6 @@ function calculate() {
   }
 
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
-
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
 
@@ -734,6 +765,7 @@ function calculate() {
           .sort((a, b) => b.qty - a.qty);
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
+
       return;
     }
 
@@ -743,8 +775,8 @@ function calculate() {
 
     const smeltList = getItems();
     const recipeMap = buildRecipeMap(smeltList);
-    const totals = new Map();
 
+    const totals = new Map();
     if (Array.isArray(item.materials) && item.materials.length > 0) {
       for (const mat of item.materials) {
         expandMaterials(recipeMap, mat.name, mat.qty * actionsNeeded, totals);
@@ -820,6 +852,7 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
+
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -842,10 +875,12 @@ currentLevelInput.addEventListener("input", () => {
   renderButtons();
   calculate();
 });
+
 targetLevelInput.addEventListener("input", () => {
   enforceLevelBoundsLive(targetLevelInput);
   calculate();
 });
+
 currentXPInput.addEventListener("input", () => {
   enforcePercentBoundsLive(currentXPInput);
   calculate();
@@ -856,10 +891,12 @@ currentLevelInput.addEventListener("blur", () => {
   renderButtons();
   calculate();
 });
+
 targetLevelInput.addEventListener("blur", () => {
   normalizeLevelInput(targetLevelInput);
   calculate();
 });
+
 currentXPInput.addEventListener("blur", () => {
   normalizePercentInput(currentXPInput);
   calculate();
@@ -868,6 +905,7 @@ currentXPInput.addEventListener("blur", () => {
 worldBoostInput.addEventListener("change", calculate);
 if (bonusStarsInput) bonusStarsInput.addEventListener("change", calculate);
 wisdomRelicInput.addEventListener("change", calculate);
+
 if (infernalHammerInput) infernalHammerInput.addEventListener("change", calculate);
 if (infernalRingInput) infernalRingInput.addEventListener("change", calculate);
 if (prospectorsNeckInput) prospectorsNeckInput.addEventListener("change", calculate);
