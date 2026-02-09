@@ -1,19 +1,20 @@
-// script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge
+// script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge + ✅ Alchemy Gather+Brew
+// ✅ Icons supported:
 //    - Crafting:    ./Icons/Crafting/*.png
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png  
+//    - Tailoring:   ./Icons/Tailoring/*.png   (your Spellbinding)
 //    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png     
-//    - Smithing:    ./Icons/Smithing/*.png    
+//    - Alchemy:     ./Icons/Alchemy/*.png     (AUTO by item.name -> filename)
+//    - Smithing:    ./Icons/Smithing/*.png    (AUTO by item.name -> filename)
 
 // ---------- State ----------
 let activeSkillKey = "fishing";
 let selectedItemKey = skills[activeSkillKey].items[0].key;
 
-// Alchemy (2 modes)
-let alchemyMode = "gather_only"; // gather_only | brew_only
+// ✅ Alchemy (3 modes)
+let alchemyMode = "gather_only"; // gather_only | brew_only | gather_brew
 
 // Smithing (2 modes)
 let smithingMode = "smelt"; // smelt | forge
@@ -47,10 +48,8 @@ const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
-
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
-
 const alchemyModeBox = document.getElementById("alchemyModeBox");
 const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
@@ -193,14 +192,12 @@ function nameToFilename(name) {
 function getSkillItemNameByKey(skillKey, itemKey) {
   const s = skills[skillKey];
   if (!s) return null;
-
   if (skillKey === "alchemy") {
     const plants = Array.isArray(s.plants) ? s.plants : [];
     const brews = Array.isArray(s.brews) ? s.brews : [];
     const found = plants.find(it => it.key === itemKey) || brews.find(it => it.key === itemKey);
     return found ? found.name : null;
   }
-
   const items = Array.isArray(s.items) ? s.items : [];
   const found = items.find(it => it.key === itemKey);
   return found ? found.name : null;
@@ -300,6 +297,7 @@ function getTotalMultiplier() {
       ? PROSPECTORS_NECK_MULT
       : 1;
 
+  // Melee/Mage ignore set bonus
   if (activeSkillKey === "melee" || activeSkillKey === "mage") {
     return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck;
   }
@@ -311,6 +309,13 @@ function getTotalMultiplier() {
 // ---------- Data access ----------
 function getSkill() {
   return skills[activeSkillKey];
+}
+
+// ✅ Alchemy helper: detect plant by name
+function getAlchemyPlantByName(name) {
+  const plants = (skills.alchemy && skills.alchemy.plants) ? skills.alchemy.plants : [];
+  const needle = String(name || "").trim().toLowerCase();
+  return plants.find(p => String(p.name || "").trim().toLowerCase() === needle) || null;
 }
 
 function isSmithingSmeltItem(it) {
@@ -397,14 +402,17 @@ function getSmithingAvailableBarKeys() {
 function getItems() {
   const s = getSkill();
 
+  // ✅ Alchemy:
+  // - gather_only => plants
+  // - brew_only & gather_brew => brews (so Gather+Brew shows potions like your reference)
   if (activeSkillKey === "alchemy") {
-    return alchemyMode === "brew_only" ? (s.brews || []) : (s.plants || []);
+    if (alchemyMode === "gather_only") return (s.plants || []);
+    return (s.brews || []);
   }
 
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
-
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -450,6 +458,7 @@ function expandMaterials(recipeMap, name, qty, out, depth = 0) {
   }
 }
 
+// expand only one level (used for smithing forge: bars -> ores)
 function expandOneStep(recipeMap, name, qty, out) {
   const recipe = recipeMap.get(name);
   if (!recipe) return false;
@@ -477,7 +486,6 @@ function renderSmithingBarTabs() {
     btn.className = "item-btn";
     btn.textContent = SMITHING_BAR_LABELS[barKey] || barKey;
     if (barKey === smithingBarKey) btn.classList.add("active");
-
     btn.addEventListener("click", () => {
       smithingBarKey = barKey;
       const list = getItems();
@@ -486,7 +494,6 @@ function renderSmithingBarTabs() {
       renderButtons();
       calculate();
     });
-
     smithingBarTabs.appendChild(btn);
   }
 }
@@ -541,7 +548,9 @@ function renderHeader() {
     selectHint.textContent =
       alchemyMode === "brew_only"
         ? "Select a potion/brew to brew (locked until you reach the required level)"
-        : "Select a plant to gather (locked until you reach the required level)";
+        : alchemyMode === "gather_brew"
+          ? "Select a potion/brew to gather plants + brew (locked until you reach the required level)"
+          : "Select a plant to gather (locked until you reach the required level)";
   } else if (activeSkillKey === "smithing") {
     selectHint.textContent =
       smithingMode === "forge"
@@ -560,11 +569,12 @@ function renderButtons() {
 
   const rawCur = readNumberInput(currentLevelInput);
   const cur = rawCur === null ? 1 : clampLevel(rawCur);
-
   const items = getItems();
   if (!items.length) return;
 
   const selected = getSelectedItem();
+
+  // if selected item is locked, snap to first available
   if (cur < selected.level) {
     const firstAvail = items.find((i) => i.level <= cur) || items[0];
     selectedItemKey = firstAvail.key;
@@ -620,13 +630,10 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
-
   const left = document.createElement("b");
   left.textContent = name;
-
   const right = document.createElement("span");
   right.textContent = fmt(qty);
-
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -635,13 +642,10 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
-
   const left = document.createElement("b");
   left.textContent = title;
-
   const right = document.createElement("span");
   right.textContent = "";
-
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -677,6 +681,8 @@ function calculate() {
   }
 
   const mult = getTotalMultiplier();
+
+  // Default boosted XP for selected item
   const boostedXP = Math.floor(item.xp * mult);
 
   chosenP.textContent =
@@ -691,9 +697,9 @@ function calculate() {
   const curBase = levelXP[current];
   const nextBase = current < 120 ? levelXP[current + 1] : levelXP[120];
   const toNext = current < 120 ? nextBase - curBase : 0;
-
   const xpIntoLevel = current >= 120 ? 0 : Math.floor(toNext * (pct / 100));
   const currentTotalXP = curBase + xpIntoLevel;
+
   const targetTotalXP = levelXP[target];
   const xpNeeded = targetTotalXP - currentTotalXP;
 
@@ -709,20 +715,74 @@ function calculate() {
     return;
   }
 
+  // default actions needed (used for most skills)
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
+
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
 
   // ---- Alchemy special ----
   if (activeSkillKey === "alchemy") {
+    // ✅ Gather + Brew mode
+    if (alchemyMode === "gather_brew") {
+      const ing = Array.isArray(item.materials) ? item.materials : [];
+
+      // per 1 brew:
+      // gather XP = sum(plantXP * qty) where the mat is a plant
+      // brew XP = item.xp
+      let gatherBoostedPerBrew = 0;
+
+      for (const mat of ing) {
+        const plant = getAlchemyPlantByName(mat.name);
+        if (plant) {
+          const oneGather = Math.floor((plant.xp || 0) * mult);
+          gatherBoostedPerBrew += oneGather * (mat.qty || 0);
+        }
+      }
+
+      const brewBoosted = Math.floor((item.xp || 0) * mult);
+      const cycleXP = gatherBoostedPerBrew + brewBoosted;
+
+      if (cycleXP <= 0) {
+        resultP.textContent = "Cycle XP is 0. Check plant/brew XP values.";
+        materialsBox.classList.add("hidden");
+        return;
+      }
+
+      const brewsNeeded = Math.ceil(xpNeeded / cycleXP);
+      const totalXP = brewsNeeded * cycleXP;
+
+      // Match reference-ish output style
+      resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total ${item.name}: ${fmt(brewsNeeded)}`;
+      materialsTitle.textContent = "Totals";
+
+      addMaterialRow("Total exp", totalXP);
+      addMaterialRow(`Total ${item.name}`, brewsNeeded);
+
+      // Totals for all mats (plants + drops)
+      const totals = new Map();
+      for (const mat of ing) addCount(totals, mat.name, (mat.qty || 0) * brewsNeeded);
+
+      // Sort by qty desc
+      const sorted = Array.from(totals.entries())
+        .map(([name, qty]) => ({ name, qty }))
+        .sort((a, b) => b.qty - a.qty);
+
+      for (const r of sorted) addMaterialRow(`Total ${r.name}`, r.qty);
+
+      return;
+    }
+
+    // Brew only
     if (alchemyMode === "brew_only") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total brews: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Totals";
+
       addMaterialRow("Total brews", actionsNeeded);
 
       const totals = new Map();
       const ing = Array.isArray(item.materials) ? item.materials : [];
-      for (const mat of ing) addCount(totals, mat.name, mat.qty * actionsNeeded);
+      for (const mat of ing) addCount(totals, mat.name, (mat.qty || 0) * actionsNeeded);
 
       const sorted = Array.from(totals.entries())
         .map(([name, qty]) => ({ name, qty }))
@@ -732,6 +792,7 @@ function calculate() {
       return;
     }
 
+    // Gather only
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total plants: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Totals";
     addMaterialRow(item.name, actionsNeeded);
@@ -743,18 +804,18 @@ function calculate() {
     if (smithingMode === "forge") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Total materials needed";
-
       addMaterialRow("Total forges", actionsNeeded);
 
+      // Build recipe map only for smelting items (so bars can expand to ores)
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
-      // direct forge requirements (bars/thread/etc)
+      // 1) Direct forge requirements (bars/thread/logs/etc)
       const directTotals = new Map();
-      for (const mat of req) addCount(directTotals, mat.name, mat.qty * actionsNeeded);
+      for (const mat of req) addCount(directTotals, mat.name, (mat.qty || 0) * actionsNeeded);
 
       const directSorted = Array.from(directTotals.entries())
         .map(([name, qty]) => ({ name, qty }))
@@ -762,37 +823,35 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
-      // one-step ore expansion for bars
+      // 2) One-step ore expansion for bars (bar -> ores)
       const oreTotals = new Map();
       for (const mat of req) {
-        expandOneStep(smeltRecipeMap, mat.name, mat.qty * actionsNeeded, oreTotals);
+        expandOneStep(smeltRecipeMap, mat.name, (mat.qty || 0) * actionsNeeded, oreTotals);
       }
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
-
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
-
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
 
       return;
     }
 
+    // Smelt mode
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
-
     addMaterialRow("Total smelts", actionsNeeded);
 
-    const smeltList = getItems();
+    const smeltList = getItems(); // already filtered to smelt items
     const recipeMap = buildRecipeMap(smeltList);
 
     const totals = new Map();
     if (Array.isArray(item.materials) && item.materials.length > 0) {
       for (const mat of item.materials) {
-        expandMaterials(recipeMap, mat.name, mat.qty * actionsNeeded, totals);
+        expandMaterials(recipeMap, mat.name, (mat.qty || 0) * actionsNeeded, totals);
       }
     } else {
       addCount(totals, item.name, actionsNeeded);
@@ -826,16 +885,17 @@ function calculate() {
   if (skill.materialsMode === "recipe") {
     materialsTitle.textContent = "Total materials needed";
 
+    // ✅ SPECIAL: Spellbinding - keep Book count, and show book-mats separately (logs/leather)
     if (activeSkillKey === "spellbinding") {
       const recipeMap = buildRecipeMap(skill.items || []);
 
-      // 1) Show DIRECT materials for the selected tome (Book / Essence / Relic / etc)
+      // 1) Direct mats (Book / Essence / Relic / etc)
       const directTotals = new Map();
       let totalBooks = 0;
 
       const req = Array.isArray(item.materials) ? item.materials : [];
       for (const mat of req) {
-        const qty = mat.qty * actionsNeeded;
+        const qty = (mat.qty || 0) * actionsNeeded;
         addCount(directTotals, mat.name, qty);
         if ((mat.name || "").toLowerCase() === "book") totalBooks += qty;
       }
@@ -846,22 +906,20 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
-      // 2) Expand ONLY the books into their base mats, and show as a separate section
+      // 2) Expand ONLY the books into base mats, separate section
       if (totalBooks > 0) {
         const bookMats = new Map();
         expandMaterials(recipeMap, "Book", totalBooks, bookMats);
 
-        // Remove intermediate names if you don’t want them listed
+        // Remove intermediates if you don’t want them listed
         bookMats.delete("Book");
         bookMats.delete("Paper");
 
         if (bookMats.size > 0) {
           addSectionRow("Mats needed to make books");
-
           const bookSorted = Array.from(bookMats.entries())
             .map(([name, qty]) => ({ name, qty }))
             .sort((a, b) => b.qty - a.qty);
-
           for (const r of bookSorted) addMaterialRow(r.name, r.qty);
         }
       }
@@ -875,7 +933,7 @@ function calculate() {
 
     if (Array.isArray(item.materials) && item.materials.length > 0) {
       for (const mat of item.materials) {
-        expandMaterials(recipeMap, mat.name, mat.qty * actionsNeeded, totals);
+        expandMaterials(recipeMap, mat.name, (mat.qty || 0) * actionsNeeded, totals);
       }
     } else {
       addCount(totals, item.name, actionsNeeded);
@@ -910,6 +968,7 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
+
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -976,6 +1035,7 @@ document.querySelectorAll('input[name="setBonus"]').forEach((r) =>
 document.querySelectorAll('input[name="alchemyMode"]').forEach((r) =>
   r.addEventListener("change", () => {
     alchemyMode = r.value;
+
     if (activeSkillKey === "alchemy") {
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
