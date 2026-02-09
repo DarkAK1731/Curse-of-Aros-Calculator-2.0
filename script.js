@@ -1,9 +1,9 @@
-// script.js (FULL)
+// script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge
 //    - Crafting:    ./Icons/Crafting/*.png
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png   
+//    - Tailoring:   ./Icons/Tailoring/*.png  
 //    - Cooking:     ./Icons/Cooking/*.png
 //    - Alchemy:     ./Icons/Alchemy/*.png     
 //    - Smithing:    ./Icons/Smithing/*.png    
@@ -47,6 +47,7 @@ const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
+
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
 
@@ -184,7 +185,7 @@ const COOKING_ICON_MAP = {
   cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
 };
 
-// AUTO FILENAME HELPERS (Alchemy + Smithing)
+// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing)
 function nameToFilename(name) {
   return String(name || "").trim().replace(/ /g, "_") + ".png";
 }
@@ -214,14 +215,14 @@ function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "spellbinding") return TAILORING_ICON_MAP[itemKey] || "";
   if (skillKey === "cooking") return COOKING_ICON_MAP[itemKey] || "";
 
-  // Alchemy auto path
+  // ✅ Alchemy auto path
   if (skillKey === "alchemy") {
     const name = getSkillItemNameByKey("alchemy", itemKey);
     if (!name) return "";
     return "./Icons/Alchemy/" + nameToFilename(name);
   }
 
-  // Smithing auto path
+  // ✅ Smithing auto path
   if (skillKey === "smithing") {
     const name = getSkillItemNameByKey("smithing", itemKey);
     if (!name) return "";
@@ -619,10 +620,13 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = name;
+
   const right = document.createElement("span");
   right.textContent = fmt(qty);
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -631,10 +635,13 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = title;
+
   const right = document.createElement("span");
   right.textContent = "";
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -653,6 +660,7 @@ function calculate() {
   }
 
   const item = getSelectedItem();
+
   const rawCurrent = readNumberInput(currentLevelInput);
   const rawTarget = readNumberInput(targetLevelInput);
   const rawPct = readNumberInput(currentXPInput);
@@ -686,7 +694,6 @@ function calculate() {
 
   const xpIntoLevel = current >= 120 ? 0 : Math.floor(toNext * (pct / 100));
   const currentTotalXP = curBase + xpIntoLevel;
-
   const targetTotalXP = levelXP[target];
   const xpNeeded = targetTotalXP - currentTotalXP;
 
@@ -736,6 +743,7 @@ function calculate() {
     if (smithingMode === "forge") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Total materials needed";
+
       addMaterialRow("Total forges", actionsNeeded);
 
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
@@ -744,6 +752,7 @@ function calculate() {
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
+      // direct forge requirements (bars/thread/etc)
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, mat.qty * actionsNeeded);
 
@@ -753,6 +762,7 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
+      // one-step ore expansion for bars
       const oreTotals = new Map();
       for (const mat of req) {
         expandOneStep(smeltRecipeMap, mat.name, mat.qty * actionsNeeded, oreTotals);
@@ -760,9 +770,11 @@ function calculate() {
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
+
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
+
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
 
@@ -771,6 +783,7 @@ function calculate() {
 
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
+
     addMaterialRow("Total smelts", actionsNeeded);
 
     const smeltList = getItems();
@@ -812,6 +825,51 @@ function calculate() {
 
   if (skill.materialsMode === "recipe") {
     materialsTitle.textContent = "Total materials needed";
+
+    if (activeSkillKey === "spellbinding") {
+      const recipeMap = buildRecipeMap(skill.items || []);
+
+      // 1) Show DIRECT materials for the selected tome (Book / Essence / Relic / etc)
+      const directTotals = new Map();
+      let totalBooks = 0;
+
+      const req = Array.isArray(item.materials) ? item.materials : [];
+      for (const mat of req) {
+        const qty = mat.qty * actionsNeeded;
+        addCount(directTotals, mat.name, qty);
+        if ((mat.name || "").toLowerCase() === "book") totalBooks += qty;
+      }
+
+      const directSorted = Array.from(directTotals.entries())
+        .map(([name, qty]) => ({ name, qty }))
+        .sort((a, b) => b.qty - a.qty);
+
+      for (const r of directSorted) addMaterialRow(r.name, r.qty);
+
+      // 2) Expand ONLY the books into their base mats, and show as a separate section
+      if (totalBooks > 0) {
+        const bookMats = new Map();
+        expandMaterials(recipeMap, "Book", totalBooks, bookMats);
+
+        // Remove intermediate names if you don’t want them listed
+        bookMats.delete("Book");
+        bookMats.delete("Paper");
+
+        if (bookMats.size > 0) {
+          addSectionRow("Mats needed to make books");
+
+          const bookSorted = Array.from(bookMats.entries())
+            .map(([name, qty]) => ({ name, qty }))
+            .sort((a, b) => b.qty - a.qty);
+
+          for (const r of bookSorted) addMaterialRow(r.name, r.qty);
+        }
+      }
+
+      return;
+    }
+
+    // Normal recipe mode (fully expand)
     const recipeMap = buildRecipeMap(skill.items || []);
     const totals = new Map();
 
@@ -852,7 +910,6 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
-
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -862,9 +919,11 @@ tabs.forEach((btn) => {
 
     renderTabs();
     renderHeader();
+
     currentLevelInput.value = 1;
     targetLevelInput.value = 5;
     currentXPInput.value = 0;
+
     renderButtons();
     calculate();
   });
