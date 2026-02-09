@@ -1,13 +1,12 @@
-// script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge
-// ✅ Icons supported:
+// script.js (FULL)
 //    - Crafting:    ./Icons/Crafting/*.png
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png
+//    - Tailoring:   ./Icons/Tailoring/*.png   (your Spellbinding)
 //    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png
-//    - Smithing:    ./Icons/Smithing/*.png
+//    - Alchemy:     ./Icons/Alchemy/*.png     (AUTO by item.name -> filename)
+//    - Smithing:    ./Icons/Smithing/*.png    (AUTO by item.name -> filename)
 
 // ---------- State ----------
 let activeSkillKey = "fishing";
@@ -27,11 +26,14 @@ const currentLabel = document.getElementById("currentLabel");
 const targetLabel = document.getElementById("targetLabel");
 const selectHint = document.getElementById("selectHint");
 const itemButtonsDiv = document.getElementById("itemButtons");
+
 const currentLevelInput = document.getElementById("currentLevel");
 const targetLevelInput = document.getElementById("targetLevel");
 const currentXPInput = document.getElementById("currentXP");
+
 const chosenP = document.getElementById("chosen");
 const resultP = document.getElementById("result");
+
 const worldBoostInput = document.getElementById("worldBoost");
 const bonusStarsInput = document.getElementById("bonusStars");
 const wisdomRelicInput = document.getElementById("wisdomRelic");
@@ -48,6 +50,7 @@ const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
+
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
 
@@ -185,7 +188,7 @@ const COOKING_ICON_MAP = {
   cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
 };
 
-// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing)
+// AUTO FILENAME HELPERS (Alchemy + Smithing)
 function nameToFilename(name) {
   return String(name || "").trim().replace(/ /g, "_") + ".png";
 }
@@ -206,6 +209,7 @@ function getSkillItemNameByKey(skillKey, itemKey) {
   return found ? found.name : null;
 }
 
+// ONE correct icon resolver
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
   if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
@@ -214,14 +218,14 @@ function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "spellbinding") return TAILORING_ICON_MAP[itemKey] || "";
   if (skillKey === "cooking") return COOKING_ICON_MAP[itemKey] || "";
 
-  // Alchemy auto path
+  // ✅ Alchemy auto path
   if (skillKey === "alchemy") {
     const name = getSkillItemNameByKey("alchemy", itemKey);
     if (!name) return "";
     return "./Icons/Alchemy/" + nameToFilename(name);
   }
 
-  // Smithing auto path
+  // ✅ Smithing auto path
   if (skillKey === "smithing") {
     const name = getSkillItemNameByKey("smithing", itemKey);
     if (!name) return "";
@@ -403,7 +407,6 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
-
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -579,6 +582,7 @@ function renderButtons() {
       img.className = "btn-icon";
       img.src = iconPath;
       img.alt = "";
+
       img.onerror = () => {
         img.remove();
         if (!btn.querySelector(".btn-text")) {
@@ -606,8 +610,13 @@ function renderButtons() {
 
     btn.addEventListener("click", () => {
       if (btn.disabled) return;
+
+      const prev = itemButtonsDiv.querySelector(".item-btn.active");
+      if (prev) prev.classList.remove("active");
+
+      btn.classList.add("active");
       selectedItemKey = it.key;
-      renderButtons();
+
       calculate();
     });
 
@@ -619,10 +628,13 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = name;
+
   const right = document.createElement("span");
   right.textContent = fmt(qty);
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -631,10 +643,13 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = title;
+
   const right = document.createElement("span");
   right.textContent = "";
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -653,6 +668,7 @@ function calculate() {
   }
 
   const item = getSelectedItem();
+
   const rawCurrent = readNumberInput(currentLevelInput);
   const rawTarget = readNumberInput(targetLevelInput);
   const rawPct = readNumberInput(currentXPInput);
@@ -703,6 +719,7 @@ function calculate() {
   }
 
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
+
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
 
@@ -711,6 +728,7 @@ function calculate() {
     if (alchemyMode === "brew_only") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total brews: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Totals";
+
       addMaterialRow("Total brews", actionsNeeded);
 
       const totals = new Map();
@@ -736,6 +754,7 @@ function calculate() {
     if (smithingMode === "forge") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Total materials needed";
+
       addMaterialRow("Total forges", actionsNeeded);
 
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
@@ -744,6 +763,7 @@ function calculate() {
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
+      // direct bar requirements
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, mat.qty * actionsNeeded);
 
@@ -753,6 +773,7 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
+      // ores needed to smelt those bars (1-step)
       const oreTotals = new Map();
       for (const mat of req) {
         expandOneStep(smeltRecipeMap, mat.name, mat.qty * actionsNeeded, oreTotals);
@@ -760,17 +781,21 @@ function calculate() {
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
+
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
+
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
 
       return;
     }
 
+    // smelting mode
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
+
     addMaterialRow("Total smelts", actionsNeeded);
 
     const smeltList = getItems();
@@ -852,7 +877,6 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
-
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -862,17 +886,19 @@ tabs.forEach((btn) => {
 
     renderTabs();
     renderHeader();
+
     currentLevelInput.value = 1;
     targetLevelInput.value = 5;
     currentXPInput.value = 0;
+
     renderButtons();
     calculate();
   });
 });
 
+// ✅ OPTIMIZED: no renderButtons() while typing
 currentLevelInput.addEventListener("input", () => {
   enforceLevelBoundsLive(currentLevelInput);
-  renderButtons();
   calculate();
 });
 
@@ -888,7 +914,7 @@ currentXPInput.addEventListener("input", () => {
 
 currentLevelInput.addEventListener("blur", () => {
   normalizeLevelInput(currentLevelInput);
-  renderButtons();
+  renderButtons(); // rebuild once after you finish typing
   calculate();
 });
 
