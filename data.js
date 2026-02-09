@@ -1,4 +1,4 @@
-// data.js (FULL will add gather+brewing together)
+// data.js (FULL + UPDATED Smithing smelt + forge items + new high-level bars/alloys)
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -67,7 +67,7 @@ const skills = {
       { key:"cobalt",     name:"Cobalt Ore",     level:60,  xp:1200, meta:{ tool:"Pickaxe" } },
       { key:"varaxium",   name:"Varaxium",       level:70,  xp:1800, meta:{ tool:"Pickaxe" } },
       { key:"black_salt", name:"Black Salt",     level:75,  xp:2500, meta:{ tool:"Pickaxe" } },
-      { key:"magic_ore",      name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
+      { key:"magic_ore",  name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
       { key:"naturite",   name:"Naturite",       level:85,  xp:7500, meta:{ tool:"Pickaxe" } },
       { key:"obsidian",   name:"Obsidian",       level:90,  xp:9000, meta:{ tool:"Pickaxe" } },
     ]
@@ -279,7 +279,10 @@ const skills = {
       { key:"cobalt_bar",     name:"Cobalt Bar",     level:60, xp:200,  materials:[ {name:"Cobalt Ore", qty:8}, {name:"Coal Ore", qty:5} ] },
       { key:"varaxite_bar",   name:"Varaxite Bar",   level:70, xp:350,  materials:[ {name:"Varaxium", qty:6}, {name:"Cobalt Ore", qty:3} ] },
       { key:"magic_bar",      name:"Magic Bar",      level:80, xp:400,  materials:[ {name:"Magic Ore", qty:9} ] },
-      { key:"naturite_bar",   name:"Naturite",       level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
+
+      // ✅ FIXED: avoid self-recipe loop (name differs from ore name)
+      { key:"naturite_bar",   name:"Naturite Bar",   level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
+
       { key:"obsidian_bar",   name:"Obsidian Bar",   level:90, xp:5500, materials:[ {name:"Obsidian", qty:100} ] },
       { key:"defiled_alloy",  name:"Defiled Alloy",  level:90, xp:2500, materials:[ {name:"Obsidian Bar", qty:1}, {name:"Gold Bar", qty:1} ] },
 
