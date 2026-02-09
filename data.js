@@ -1,4 +1,4 @@
-// data.js (Completed I think)
+// data.js (FULL will add gather+brewing together)
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -67,7 +67,7 @@ const skills = {
       { key:"cobalt",     name:"Cobalt Ore",     level:60,  xp:1200, meta:{ tool:"Pickaxe" } },
       { key:"varaxium",   name:"Varaxium",       level:70,  xp:1800, meta:{ tool:"Pickaxe" } },
       { key:"black_salt", name:"Black Salt",     level:75,  xp:2500, meta:{ tool:"Pickaxe" } },
-      { key:"magic_ore",  name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
+      { key:"magic_ore",      name:"Magic Ore",      level:80,  xp:3200, meta:{ tool:"Pickaxe" } },
       { key:"naturite",   name:"Naturite",       level:85,  xp:7500, meta:{ tool:"Pickaxe" } },
       { key:"obsidian",   name:"Obsidian",       level:90,  xp:9000, meta:{ tool:"Pickaxe" } },
     ]
@@ -179,6 +179,7 @@ const skills = {
     ]
   },
 
+  // ✅ Alchemy split: Plants (Gather Only) + Brews (Brew Only)
   alchemy: {
     title: "Alchemy",
     currentLabel: "Your Alchemy Level",
@@ -264,7 +265,9 @@ const skills = {
     unitsLabel: (name) => `Total ${name}`,
     materialsMode: "recipe",
     items: [
-      
+      // -------------------------
+      // SMELTING (Bars / Alloys)
+      // -------------------------
       { key:"bronze_bar",     name:"Bronze Bar",     level:1,  xp:3,    materials:[ {name:"Copper Ore", qty:1}, {name:"Tin Ore", qty:1} ] },
       { key:"iron_bar",       name:"Iron Bar",       level:10, xp:8,    materials:[ {name:"Iron Ore", qty:2} ] },
       { key:"steel_bar",      name:"Steel Bar",      level:20, xp:14,   materials:[ {name:"Iron Ore", qty:2}, {name:"Coal Ore", qty:1} ] },
@@ -276,11 +279,13 @@ const skills = {
       { key:"cobalt_bar",     name:"Cobalt Bar",     level:60, xp:200,  materials:[ {name:"Cobalt Ore", qty:8}, {name:"Coal Ore", qty:5} ] },
       { key:"varaxite_bar",   name:"Varaxite Bar",   level:70, xp:350,  materials:[ {name:"Varaxium", qty:6}, {name:"Cobalt Ore", qty:3} ] },
       { key:"magic_bar",      name:"Magic Bar",      level:80, xp:400,  materials:[ {name:"Magic Ore", qty:9} ] },
-
-      { key:"naturite_bar",   name:"Naturite Bar",   level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
+      { key:"naturite_bar",   name:"Naturite",       level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
       { key:"obsidian_bar",   name:"Obsidian Bar",   level:90, xp:5500, materials:[ {name:"Obsidian", qty:100} ] },
       { key:"defiled_alloy",  name:"Defiled Alloy",  level:90, xp:2500, materials:[ {name:"Obsidian Bar", qty:1}, {name:"Gold Bar", qty:1} ] },
 
+      // -------------------------
+      // FORGING (Bronze)
+      // -------------------------
       { key:"bronze_secateurs", name:"Bronze Secateurs", level:1, xp:10, materials:[ {name:"Bronze Bar", qty:2} ] },
       { key:"bronze_pickaxe",   name:"Bronze Pickaxe",   level:1, xp:15, materials:[ {name:"Bronze Bar", qty:3}, {name:"Pine Logs", qty:1} ] },
       { key:"bronze_cap",       name:"Bronze Cap",       level:1, xp:15, materials:[ {name:"Bronze Bar", qty:3} ] },
@@ -294,6 +299,9 @@ const skills = {
       { key:"bronze_platelegs", name:"Bronze Platelegs", level:7, xp:25, materials:[ {name:"Bronze Bar", qty:5} ] },
       { key:"bronze_platebody", name:"Bronze Platebody", level:8, xp:35, materials:[ {name:"Bronze Bar", qty:7} ] },
 
+      // -------------------------
+      // FORGING (Iron)
+      // -------------------------
       { key:"iron_secateurs", name:"Iron Secateurs", level:10, xp:28, materials:[ {name:"Iron Bar", qty:2} ] },
       { key:"iron_pickaxe",   name:"Iron Pickaxe",   level:10, xp:42, materials:[ {name:"Iron Bar", qty:3}, {name:"Birch Logs", qty:1} ] },
       { key:"iron_spade",     name:"Iron Spade",     level:10, xp:50, materials:[ {name:"Iron Bar", qty:3}, {name:"Birch Logs", qty:1} ] },
@@ -308,6 +316,9 @@ const skills = {
       { key:"iron_platelegs", name:"Iron Platelegs", level:16, xp:70, materials:[ {name:"Iron Bar", qty:5} ] },
       { key:"iron_platebody", name:"Iron Platebody", level:18, xp:84, materials:[ {name:"Iron Bar", qty:6} ] },
 
+      // -------------------------
+      // FORGING (Steel)
+      // -------------------------
       { key:"steel_secateurs",   name:"Steel Secateurs",   level:20, xp:40,  materials:[ {name:"Steel Bar", qty:2} ] },
       { key:"steel_pickaxe",     name:"Steel Pickaxe",     level:20, xp:80,  materials:[ {name:"Steel Bar", qty:4}, {name:"Applewood", qty:1} ] },
       { key:"steel_cap",         name:"Steel Cap",         level:21, xp:80,  materials:[ {name:"Steel Bar", qty:4} ] },
@@ -322,6 +333,9 @@ const skills = {
       { key:"steel_platelegs",   name:"Steel Platelegs",   level:26, xp:100, materials:[ {name:"Steel Bar", qty:5} ] },
       { key:"steel_platebody",   name:"Steel Platebody",   level:28, xp:120, materials:[ {name:"Steel Bar", qty:6} ] },
 
+      // -------------------------
+      // FORGING (Crimsteel)
+      // -------------------------
       { key:"crimsteel_secateurs", name:"Crimsteel Secateurs", level:30, xp:250, materials:[ {name:"Crimsteel Bar", qty:2} ] },
       { key:"crimsteel_pickaxe",   name:"Crimsteel Pickaxe",   level:30, xp:520, materials:[ {name:"Crimsteel Bar", qty:4}, {name:"Willow Logs", qty:1} ] },
       { key:"crimsteel_spade",     name:"Crimsteel Spade",     level:30, xp:650, materials:[ {name:"Crimsteel Bar", qty:3}, {name:"Willow Logs", qty:1} ] },
@@ -337,12 +351,18 @@ const skills = {
       { key:"crimsteel_platelegs", name:"Crimsteel Platelegs", level:37, xp:650, materials:[ {name:"Crimsteel Bar", qty:5} ] },
       { key:"crimsteel_platebody", name:"Crimsteel Platebody", level:38, xp:780, materials:[ {name:"Crimsteel Bar", qty:6} ] },
 
+      // -------------------------
+      // FORGING (Silver - Jewelry)
+      // -------------------------
       { key:"sapphire_necklace", name:"Sapphire Necklace", level:35, xp:4080, materials:[ {name:"Sapphire", qty:4}, {name:"Silver Bar", qty:4} ] },
       { key:"ruby_necklace",     name:"Ruby Necklace",     level:35, xp:4080, materials:[ {name:"Ruby", qty:4}, {name:"Silver Bar", qty:4} ] },
       { key:"arosite_necklace",  name:"Arosite Necklace",  level:35, xp:4080, materials:[ {name:"Arosite", qty:4}, {name:"Silver Bar", qty:4} ] },
       { key:"emerald_necklace",  name:"Emerald Necklace",  level:35, xp:4080, materials:[ {name:"Emerald", qty:4}, {name:"Silver Bar", qty:4} ] },
       { key:"snake_charm",       name:"Snake Charm",       level:35, xp:2000, materials:[ {name:"Snake Eye", qty:1}, {name:"Silver Bar", qty:2} ] },
 
+      // -------------------------
+      // FORGING (Gold)
+      // -------------------------
       { key:"gold_boots",        name:"Gold Boots",        level:40, xp:20000,  materials:[ {name:"Gold Bar", qty:1} ] },
       { key:"gold_platelegs",    name:"Gold Platelegs",    level:40, xp:80000,  materials:[ {name:"Gold Bar", qty:4} ] },
       { key:"gold_gauntlets",    name:"Gold Gauntlets",    level:40, xp:20000,  materials:[ {name:"Gold Bar", qty:1} ] },
@@ -363,6 +383,9 @@ const skills = {
       { key:"magnetite_necklace",name:"Magnetite Necklace",level:40, xp:4080,   materials:[ {name:"Magnetite", qty:4}, {name:"Gold Bar", qty:2} ] },
       { key:"battle_necklace",   name:"Battle Necklace",   level:50, xp:45000,  materials:[ {name:"Emerald", qty:4}, {name:"Gold Bar", qty:4}, {name:"Magnetite", qty:4}, {name:"Ruby", qty:4}, {name:"Arosite", qty:4} ] },
 
+      // -------------------------
+      // FORGING (Mythan)
+      // -------------------------
       { key:"mythan_spade",        name:"Mythan Spade",        level:45, xp:45000,  materials:[ {name:"Mythan Bar", qty:5}, {name:"Chestnut Logs", qty:1} ] },
       { key:"mythan_secateurs",    name:"Mythan Secateurs",    level:50, xp:10000,  materials:[ {name:"Mythan Bar", qty:2} ] },
       { key:"mythan_boots",        name:"Mythan Boots",        level:50, xp:25000,  materials:[ {name:"Mythan Bar", qty:5} ] },
@@ -377,6 +400,9 @@ const skills = {
       { key:"mythan_platebody",    name:"Mythan Platebody",    level:57, xp:65000,  materials:[ {name:"Mythan Bar", qty:13} ] },
       { key:"chaotic_mythan_sword",name:"Chaotic Mythan Sword",level:58, xp:125000, materials:[ {name:"Mythan Bar", qty:25} ] },
 
+      // -------------------------
+      // FORGING (Cobalt)
+      // -------------------------
       { key:"cobalt_secateurs", name:"Cobalt Secateurs", level:60, xp:30000,  materials:[ {name:"Cobalt Bar", qty:2} ] },
       { key:"cobalt_boots",     name:"Cobalt Boots",     level:60, xp:105000, materials:[ {name:"Cobalt Bar", qty:7} ] },
       { key:"cobalt_sword",     name:"Cobalt Sword",     level:61, xp:240000, materials:[ {name:"Cobalt Bar", qty:16} ] },
@@ -389,6 +415,9 @@ const skills = {
       { key:"cobalt_platelegs", name:"Cobalt Platelegs", level:66, xp:180000, materials:[ {name:"Cobalt Bar", qty:12} ] },
       { key:"cobalt_platebody", name:"Cobalt Platebody", level:67, xp:210000, materials:[ {name:"Cobalt Bar", qty:14} ] },
 
+      // -------------------------
+      // FORGING (Varaxite)
+      // -------------------------
       { key:"varaxite_secateurs", name:"Varaxite Secateurs", level:70, xp:40000,  materials:[ {name:"Varaxite Bar", qty:2} ] },
       { key:"varaxite_gauntlets", name:"Varaxite Gauntlets", level:70, xp:140000, materials:[ {name:"Varaxite Bar", qty:7} ] },
       { key:"varaxite_boots",     name:"Varaxite Boots",     level:70, xp:140000, materials:[ {name:"Varaxite Bar", qty:7} ] },
@@ -401,6 +430,9 @@ const skills = {
       { key:"varaxite_shield",    name:"Varaxite Shield",    level:75, xp:340000, materials:[ {name:"Varaxite Bar", qty:17} ] },
       { key:"varaxite_reel",      name:"Varaxite Reel",      level:76, xp:140000, materials:[ {name:"Varaxite Bar", qty:7}, {name:"Thread", qty:3} ] },
 
+      // -------------------------
+      // FORGING (Magic)
+      // -------------------------
       { key:"magic_pickaxe", name:"Magic Pickaxe", level:82, xp:250000, materials:[ {name:"Magic Bar", qty:10}, {name:"Magic Log", qty:1} ] },
       { key:"magic_axe",     name:"Magic Axe",     level:83, xp:250000, materials:[ {name:"Magic Bar", qty:10}, {name:"Magic Log", qty:1} ] },
       { key:"magic_reel",    name:"Magic Reel",    level:86, xp:175000, materials:[ {name:"Magic Bar", qty:7},  {name:"Thread", qty:3} ] },
