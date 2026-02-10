@@ -1,13 +1,14 @@
 // script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge + ✅ Alchemy Gather+Brew
-// ✅ Icons supported:
+// ✅ Icons Completed:
 //    - Crafting:    ./Icons/Crafting/*.png
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png   (your Spellbinding)
+//    - Tailoring:   ./Icons/Tailoring/*.png   
 //    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png     (AUTO by item.name -> filename)
-//    - Smithing:    ./Icons/Smithing/*.png    (AUTO by item.name -> filename)
+//    - Alchemy:     ./Icons/Alchemy/*.png    
+//    - Smithing:    ./Icons/Smithing/*.png    
+//    - Mobs         ./Icons/Mobs/*.png
 
 // ---------- State ----------
 let activeSkillKey = "fishing";
@@ -186,6 +187,7 @@ const COOKING_ICON_MAP = {
 
 // ✅ AUTO FILENAME HELPERS (Alchemy + Smithing)
 function nameToFilename(name) {
+  // Keeps apostrophes (works because your files include them, like Dragon's_Whisker.png)
   return String(name || "").trim().replace(/ /g, "_") + ".png";
 }
 
@@ -224,6 +226,13 @@ function getIconPathForItem(skillKey, itemKey) {
     const name = getSkillItemNameByKey("smithing", itemKey);
     if (!name) return "";
     return "./Icons/Smithing/" + nameToFilename(name);
+  }
+
+// ✅ Melee + Mage mob icons (AUTO path)
+  if (skillKey === "melee" || skillKey === "mage") {
+    const name = getSkillItemNameByKey(skillKey, itemKey);
+    if (!name) return "";
+    return "./Icons/Mobs/" + nameToFilename(name);
   }
 
   return "";
@@ -499,6 +508,8 @@ function renderSmithingBarTabs() {
 }
 
 function renderHeader() {
+  document.body.setAttribute("data-skill", activeSkillKey);
+
   const s = getSkill();
   skillTitle.textContent = s.title;
   currentLabel.textContent = s.currentLabel;
