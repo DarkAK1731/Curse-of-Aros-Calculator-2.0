@@ -285,7 +285,7 @@ body[data-skill="mage"] .btn-icon{
 
   body[data-skill="melee"] #itemButtons .btn-text,
   body[data-skill="mage"]  #itemButtons .btn-text{
-    font-size: 13px;
+    font-size: 11px;
     line-height: 1.2;
     text-align: left;
 
