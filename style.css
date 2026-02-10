@@ -251,45 +251,46 @@ body[data-skill="mage"] .btn-icon{
 }
 
 /* ============================
-   Mobile layout (Melee + Mage mobs) — 3 columns
+   Mobile layout (Melee + Mage mobs) — 2 columns
+   (fixes iOS overflow + keeps names inside cards)
    ============================ */
 @media (max-width: 720px){
 
   body[data-skill="melee"] #itemButtons,
   body[data-skill="mage"]  #itemButtons{
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
   }
 
   body[data-skill="melee"] #itemButtons .item-btn,
   body[data-skill="mage"]  #itemButtons .item-btn{
     width: 100%;
-    padding: 12px 12px;
+    padding: 14px;
     border-radius: 18px;
-    gap: 10px;
-    min-height: 104px;
+    gap: 12px;
+    min-height: 84px;
 
     overflow: hidden;
 
-    justify-content: center;
-    text-align: center;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
   body[data-skill="mage"]  #itemButtons .btn-icon{
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
   }
 
   body[data-skill="melee"] #itemButtons .btn-text,
   body[data-skill="mage"]  #itemButtons .btn-text{
-    font-size: 12.5px;
-    line-height: 1.2;
-    text-align: center;
+    font-size: 14px;
+    line-height: 1.25;
 
-    /* wrap at spaces only */
+    /* wrap at spaces (avoid Shado / w) */
     white-space: normal;
     word-break: keep-all;
     overflow-wrap: normal;
@@ -297,7 +298,6 @@ body[data-skill="mage"] .btn-icon{
 
     flex: 1;
     min-width: 0;
-
     max-width: 100%;
   }
 }
