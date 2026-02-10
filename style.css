@@ -238,3 +238,15 @@ input[type="number"]:focus{
 .btn-text{
   line-height:1;
 }
+
+/* ============================
+   Bigger icons for Mobs
+   (Melee + Mage)
+   ============================ */
+
+body[data-skill="melee"] .btn-icon,
+body[data-skill="mage"] .btn-icon{
+  width: 50px;          /* ← CHANGE THIS if you want bigger/smaller */
+  height:50px;
+  flex:0 0 50px;
+}
