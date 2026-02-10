@@ -253,12 +253,13 @@ body[data-skill="mage"] .btn-icon{
 
 /* ============================
    Mobile layout improvements (Melee + Mage mobs)
+   3 columns on mobile/tablet
    ============================ */
 @media (max-width: 720px){
 
-  body[data-skill="melee"] #itemButtons.grid,
-  body[data-skill="mage"]  #itemButtons.grid{
-    display: grid;
+  body[data-skill="melee"] #itemButtons,
+  body[data-skill="mage"]  #itemButtons{
+    display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
