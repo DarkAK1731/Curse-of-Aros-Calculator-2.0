@@ -269,7 +269,7 @@ body[data-skill="mage"] .btn-icon{
     padding: 12px 14px;
     border-radius: 18px;
     gap: 12px;
-    min-height: 72px;
+    min-height: 75px;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
