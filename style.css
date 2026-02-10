@@ -252,7 +252,6 @@ body[data-skill="mage"] .btn-icon{
 
 /* ============================
    Mobile layout (Melee + Mage mobs)
-   2 columns
    ============================ */
 @media (max-width: 720px){
 
@@ -286,7 +285,6 @@ body[data-skill="mage"] .btn-icon{
     line-height: 1.25;
     text-align: left;
 
-    /* wrap only at spaces */
     white-space: normal;
     word-break: normal;
     overflow-wrap: normal;
