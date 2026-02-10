@@ -136,10 +136,12 @@ input[type="number"]:focus{
   transition:.15s ease;
   user-select:none;
 
-  /* icon layout */
   display:inline-flex;
   align-items:center;
   gap:10px;
+
+  /* ✅ IMPORTANT: allow flex children to shrink inside buttons */
+  min-width: 0;
 }
 
 .item-btn:hover{
@@ -237,6 +239,7 @@ input[type="number"]:focus{
 
 .btn-text{
   line-height:1;
+  min-width: 0;
 }
 
 /* Bigger icons for mobs (Melee + Mage) */
@@ -255,18 +258,22 @@ body[data-skill="mage"] .btn-icon{
   body[data-skill="melee"] #itemButtons,
   body[data-skill="mage"]  #itemButtons{
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)); 
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
 
   body[data-skill="melee"] #itemButtons .item-btn,
   body[data-skill="mage"]  #itemButtons .item-btn{
     width: 100%;
-    align-items: center;
     padding: 12px 12px;
     border-radius: 18px;
     gap: 10px;
-    min-height: 76px; 
+    min-height: 76px;
+
+    overflow: hidden;
+
+    justify-content: center;
+    text-align: center;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
@@ -278,10 +285,11 @@ body[data-skill="mage"] .btn-icon{
 
   body[data-skill="melee"] #itemButtons .btn-text,
   body[data-skill="mage"]  #itemButtons .btn-text{
-    font-size: 13px;      
+    font-size: 12.5px;
     line-height: 1.2;
-    text-align: left;
+    text-align: center;
 
+    /* wrap at spaces only */
     white-space: normal;
     word-break: keep-all;
     overflow-wrap: normal;
@@ -289,5 +297,7 @@ body[data-skill="mage"] .btn-icon{
 
     flex: 1;
     min-width: 0;
+
+    max-width: 100%;
   }
 }
