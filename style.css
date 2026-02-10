@@ -252,15 +252,14 @@ body[data-skill="mage"] .btn-icon{
 
 /* ============================
    Mobile layout (Melee + Mage mobs) — 2 columns
-   (fixes iOS overflow + keeps names inside cards)
    ============================ */
 @media (max-width: 720px){
 
   body[data-skill="melee"] #itemButtons,
   body[data-skill="mage"]  #itemButtons{
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
   }
 
   body[data-skill="melee"] #itemButtons .item-btn,
@@ -269,13 +268,13 @@ body[data-skill="mage"] .btn-icon{
     padding: 14px;
     border-radius: 18px;
     gap: 12px;
-    min-height: 84px;
+    min-height: 90px;
+
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
     overflow: hidden;
-
-    justify-content: flex-start;
-    align-items: center;
-    text-align: left;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
@@ -290,14 +289,13 @@ body[data-skill="mage"] .btn-icon{
     font-size: 14px;
     line-height: 1.25;
 
-    /* wrap at spaces (avoid Shado / w) */
+    /* clean word wrapping */
     white-space: normal;
     word-break: keep-all;
     overflow-wrap: normal;
     hyphens: none;
 
-    flex: 1;
-    min-width: 0;
     max-width: 100%;
+    min-width: 0;
   }
 }
