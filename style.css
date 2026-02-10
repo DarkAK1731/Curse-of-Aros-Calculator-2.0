@@ -243,10 +243,9 @@ input[type="number"]:focus{
    Bigger icons for Mobs
    (Melee + Mage)
    ============================ */
-
 body[data-skill="melee"] .btn-icon,
 body[data-skill="mage"] .btn-icon{
-  width: 50px;          
+  width: 50px;         
   height:50px;
   flex:0 0 50px;
 }
@@ -254,7 +253,7 @@ body[data-skill="mage"] .btn-icon{
 /* ============================
    Mobile layout improvements (Melee + Mage mobs)
    3 columns on mobile/tablet
-   + fixed long-name overflow
+   + prevent mid-word splits
    ============================ */
 @media (max-width: 720px){
 
@@ -273,7 +272,11 @@ body[data-skill="mage"] .btn-icon{
     padding: 10px 12px;
     border-radius: 16px;
     gap: 10px;
-    min-height: 64px;
+
+    flex-wrap: wrap;
+    align-content: center;
+
+    min-height: 76px;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
@@ -285,16 +288,17 @@ body[data-skill="mage"] .btn-icon{
 
   body[data-skill="melee"] #itemButtons .btn-text,
   body[data-skill="mage"]  #itemButtons .btn-text{
-    font-size: 11px;
-    line-height: 1.2;
+    font-size: 12.5px;
+    line-height: 1.15;
     text-align: left;
 
     white-space: normal;
-    word-break: normal;
+    word-break: keep-all;     
     overflow-wrap: normal;
     hyphens: none;
 
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
+    max-width: 100%;
   }
 }
