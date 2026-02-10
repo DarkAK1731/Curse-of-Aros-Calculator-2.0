@@ -250,3 +250,39 @@ body[data-skill="mage"] .btn-icon{
   height:50px;
   flex:0 0 50px;
 }
+
+/* ============================
+   Mobile layout improvements (Melee + Mage mobs)
+   ============================ */
+@media (max-width: 720px){
+
+  body[data-skill="melee"] #itemButtons.grid,
+  body[data-skill="mage"]  #itemButtons.grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body[data-skill="melee"] #itemButtons .item-btn,
+  body[data-skill="mage"]  #itemButtons .item-btn{
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    border-radius: 16px;
+    gap: 10px;
+    min-height: 64px;
+  }
+
+  body[data-skill="melee"] #itemButtons .btn-icon,
+  body[data-skill="mage"]  #itemButtons .btn-icon{
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  body[data-skill="melee"] #itemButtons .btn-text,
+  body[data-skill="mage"]  #itemButtons .btn-text{
+    font-size: 14px;
+    line-height: 1.15;
+  }
+}
