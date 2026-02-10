@@ -251,54 +251,48 @@ body[data-skill="mage"] .btn-icon{
 }
 
 /* ============================
-   Mobile layout improvements (Melee + Mage mobs)
-   3 columns on mobile/tablet
-   + prevent mid-word splits
+   Mobile layout (Melee + Mage mobs)
+   2 columns
    ============================ */
 @media (max-width: 720px){
 
   body[data-skill="melee"] #itemButtons,
   body[data-skill="mage"]  #itemButtons{
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
   body[data-skill="melee"] #itemButtons .item-btn,
   body[data-skill="mage"]  #itemButtons .item-btn{
     width: 100%;
-    justify-content: flex-start;
     align-items: center;
-    padding: 10px 12px;
-    border-radius: 16px;
-    gap: 10px;
-
-    flex-wrap: wrap;
-    align-content: center;
-
-    min-height: 76px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    gap: 12px;
+    min-height: 72px;
   }
 
   body[data-skill="melee"] #itemButtons .btn-icon,
   body[data-skill="mage"]  #itemButtons .btn-icon{
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
   }
 
   body[data-skill="melee"] #itemButtons .btn-text,
   body[data-skill="mage"]  #itemButtons .btn-text{
-    font-size: 11px;
-    line-height: 1.15;
+    font-size: 14px;
+    line-height: 1.25;
     text-align: left;
 
+    /* wrap only at spaces */
     white-space: normal;
-    word-break: keep-all;     
+    word-break: normal;
     overflow-wrap: normal;
     hyphens: none;
 
-    flex: 1 1 0;
+    flex: 1;
     min-width: 0;
-    max-width: 100%;
   }
 }
