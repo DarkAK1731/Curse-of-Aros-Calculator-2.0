@@ -4,10 +4,10 @@
 //    - Mining:      ./Icons/Mining/*.png
 //    - Fishing:     ./Icons/Fishing/*.png
 //    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png   
+//    - Tailoring:   ./Icons/Tailoring/*.png
 //    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png    
-//    - Smithing:    ./Icons/Smithing/*.png    
+//    - Alchemy:     ./Icons/Alchemy/*.png
+//    - Smithing:    ./Icons/Smithing/*.png
 //    - Mobs         ./Icons/Mobs/*.png
 
 // ---------- State ----------
@@ -20,6 +20,9 @@ let alchemyMode = "gather_only"; // gather_only | brew_only | gather_brew
 // Smithing (2 modes)
 let smithingMode = "smelt"; // smelt | forge
 let smithingBarKey = "bronze"; // bronze|iron|steel|crimsteel|silver|gold|mythan|cobalt|varaxite|magic|other
+
+// ✅ Mobs alphabetical tab (Forge-style)
+let mobLetterKey = "A";
 
 // ---------- Elements ----------
 const tabs = Array.from(document.querySelectorAll(".tab"));
@@ -49,8 +52,10 @@ const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
 const materialsTitle = document.getElementById("materialsTitle");
+
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
+
 const alchemyModeBox = document.getElementById("alchemyModeBox");
 const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
@@ -185,7 +190,7 @@ const COOKING_ICON_MAP = {
   cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
 };
 
-// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing)
+// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing + Mobs)
 function nameToFilename(name) {
   // Keeps apostrophes (works because your files include them, like Dragon's_Whisker.png)
   return String(name || "").trim().replace(/ /g, "_") + ".png";
@@ -194,14 +199,16 @@ function nameToFilename(name) {
 function getSkillItemNameByKey(skillKey, itemKey) {
   const s = skills[skillKey];
   if (!s) return null;
+
   if (skillKey === "alchemy") {
     const plants = Array.isArray(s.plants) ? s.plants : [];
     const brews = Array.isArray(s.brews) ? s.brews : [];
-    const found = plants.find(it => it.key === itemKey) || brews.find(it => it.key === itemKey);
+    const found = plants.find((it) => it.key === itemKey) || brews.find((it) => it.key === itemKey);
     return found ? found.name : null;
   }
+
   const items = Array.isArray(s.items) ? s.items : [];
-  const found = items.find(it => it.key === itemKey);
+  const found = items.find((it) => it.key === itemKey);
   return found ? found.name : null;
 }
 
@@ -228,7 +235,7 @@ function getIconPathForItem(skillKey, itemKey) {
     return "./Icons/Smithing/" + nameToFilename(name);
   }
 
-// ✅ Melee + Mage mob icons (AUTO path)
+  // ✅ Melee + Mage mob icons (AUTO path)
   if (skillKey === "melee" || skillKey === "mage") {
     const name = getSkillItemNameByKey(skillKey, itemKey);
     if (!name) return "";
@@ -279,6 +286,107 @@ function normalizePercentInput(el) {
 }
 
 function fmt(n) { return Number(n).toLocaleString(); }
+
+// ✅ Mobs alpha helpers (Forge-style)
+function getAlphaKey(name) {
+  const ch = String(name || "").trim().charAt(0).toUpperCase();
+  return /[A-Z]/.test(ch) ? ch : "#";
+}
+
+function buildAlphabetGroups(items) {
+  const map = new Map();
+  for (const it of items) {
+    const letter = getAlphaKey(it.name);
+    if (!map.has(letter)) map.set(letter, []);
+    map.get(letter).push(it);
+  }
+  for (const [k, arr] of map.entries()) {
+    arr.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  }
+  const letters = Array.from(map.keys()).sort((a, b) => {
+    if (a === "#") return 1;
+    if (b === "#") return -1;
+    return a.localeCompare(b);
+  });
+  return letters.map(l => ({ letter: l, items: map.get(l) || [] }));
+}
+
+function renderMobLetterTabs(groups) {
+  const letters = groups.map(g => g.letter);
+  if (!letters.includes(mobLetterKey)) mobLetterKey = letters[0] || "A";
+
+  const tabsWrap = document.createElement("div");
+  tabsWrap.className = "mob-letter-tabs";
+
+  for (const g of groups) {
+    const btn = document.createElement("button");
+    btn.className = "item-btn mob-letter-tab";
+    btn.textContent = g.letter;
+
+    if (g.letter === mobLetterKey) btn.classList.add("active");
+
+    btn.addEventListener("click", () => {
+      mobLetterKey = g.letter;
+
+      const list = (groups.find(x => x.letter === mobLetterKey)?.items) || [];
+      if (list.length && !list.some(i => i.key === selectedItemKey)) {
+        selectedItemKey = list[0].key;
+      }
+
+      renderButtons();
+      calculate();
+    });
+
+    tabsWrap.appendChild(btn);
+  }
+
+  return tabsWrap;
+}
+
+function buildMobButton(it) {
+  const btn = document.createElement("button");
+  btn.className = "item-btn";
+
+  const iconPath = getIconPathForItem(activeSkillKey, it.key);
+  if (iconPath) {
+    const img = document.createElement("img");
+    img.className = "btn-icon";
+    img.src = iconPath;
+    img.alt = "";
+
+    img.onerror = () => {
+      img.remove();
+      if (!btn.querySelector(".btn-text")) {
+        const span = document.createElement("span");
+        span.className = "btn-text";
+        span.textContent = it.name;
+        btn.appendChild(span);
+      }
+    };
+
+    const span = document.createElement("span");
+    span.className = "btn-text";
+    span.textContent = it.name;
+
+    btn.appendChild(img);
+    btn.appendChild(span);
+  } else {
+    btn.textContent = it.name;
+  }
+
+  // ✅ mobs are NOT locked
+  btn.disabled = false;
+
+  if (it.key === selectedItemKey) btn.classList.add("active");
+
+  btn.addEventListener("click", () => {
+    selectedItemKey = it.key;
+    renderButtons();
+    calculate();
+  });
+
+  return btn;
+}
 
 // ---------- Multipliers ----------
 function getSetMultiplier() {
@@ -369,7 +477,6 @@ function getSmithingForgeBarKey(it) {
     if (has("silver")) return "silver";
     if (has("gold")) return "gold";
   }
-
   return "other";
 }
 
@@ -413,7 +520,7 @@ function getItems() {
 
   // ✅ Alchemy:
   // - gather_only => plants
-  // - brew_only & gather_brew => brews (so Gather+Brew shows potions like your reference)
+  // - brew_only & gather_brew => brews (so Gather+Brew shows potions)
   if (activeSkillKey === "alchemy") {
     if (alchemyMode === "gather_only") return (s.plants || []);
     return (s.brews || []);
@@ -422,6 +529,7 @@ function getItems() {
   if (activeSkillKey === "smithing") {
     const all = s.items || [];
     if (smithingMode === "smelt") return all.filter(isSmithingSmeltItem);
+
     const bars = getSmithingAvailableBarKeys();
     if (!bars.includes(smithingBarKey)) smithingBarKey = bars[0] || "bronze";
     return getSmithingForgeItemsForBar(smithingBarKey);
@@ -494,7 +602,9 @@ function renderSmithingBarTabs() {
     const btn = document.createElement("button");
     btn.className = "item-btn";
     btn.textContent = SMITHING_BAR_LABELS[barKey] || barKey;
+
     if (barKey === smithingBarKey) btn.classList.add("active");
+
     btn.addEventListener("click", () => {
       smithingBarKey = barKey;
       const list = getItems();
@@ -503,6 +613,7 @@ function renderSmithingBarTabs() {
       renderButtons();
       calculate();
     });
+
     smithingBarTabs.appendChild(btn);
   }
 }
@@ -567,6 +678,8 @@ function renderHeader() {
       smithingMode === "forge"
         ? "Select equipment to forge (locked until you reach the required level)"
         : "Select a bar/alloy to smelt (locked until you reach the required level)";
+  } else if (activeSkillKey === "melee" || activeSkillKey === "mage") {
+    selectHint.textContent = "Select a monster (no requirements)";
   } else {
     selectHint.textContent = s.selectHint;
   }
@@ -580,17 +693,54 @@ function renderButtons() {
 
   const rawCur = readNumberInput(currentLevelInput);
   const cur = rawCur === null ? 1 : clampLevel(rawCur);
+
   const items = getItems();
   if (!items.length) return;
 
-  const selected = getSelectedItem();
+  const isMobList = (activeSkillKey === "melee" || activeSkillKey === "mage");
 
-  // if selected item is locked, snap to first available
-  if (cur < selected.level) {
-    const firstAvail = items.find((i) => i.level <= cur) || items[0];
-    selectedItemKey = firstAvail.key;
+  if (!isMobList) {
+    const selected = getSelectedItem();
+    if (cur < selected.level) {
+      const firstAvail = items.find((i) => i.level <= cur) || items[0];
+      selectedItemKey = firstAvail.key;
+    }
   }
 
+  // ✅ Forge-style A-Z tabs for mobs
+  if (isMobList) {
+    const groups = buildAlphabetGroups(items);
+    if (!groups.length) return;
+
+    const letters = groups.map(g => g.letter);
+    if (!letters.includes(mobLetterKey)) {
+      const selectedLetter = getAlphaKey(getSelectedItem()?.name);
+      mobLetterKey = letters.includes(selectedLetter) ? selectedLetter : letters[0];
+    }
+
+    // tabs row
+    itemButtonsDiv.appendChild(renderMobLetterTabs(groups));
+
+    // active letter list
+    const activeGroup = groups.find(g => g.letter === mobLetterKey) || groups[0];
+    const list = activeGroup.items || [];
+
+    if (list.length && !list.some(i => i.key === selectedItemKey)) {
+      selectedItemKey = list[0].key;
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "grid alpha-grid";
+
+    for (const it of list) {
+      grid.appendChild(buildMobButton(it));
+    }
+
+    itemButtonsDiv.appendChild(grid);
+    return;
+  }
+
+  // ✅ Normal rendering for all other skills (unchanged)
   for (const it of items) {
     const btn = document.createElement("button");
     btn.className = "item-btn";
@@ -641,10 +791,13 @@ function renderButtons() {
 function addMaterialRow(name, qty) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = name;
+
   const right = document.createElement("span");
   right.textContent = fmt(qty);
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -653,10 +806,13 @@ function addMaterialRow(name, qty) {
 function addSectionRow(title) {
   const row = document.createElement("div");
   row.className = "mat-row";
+
   const left = document.createElement("b");
   left.textContent = title;
+
   const right = document.createElement("span");
   right.textContent = "";
+
   row.appendChild(left);
   row.appendChild(right);
   materialsList.appendChild(row);
@@ -684,7 +840,9 @@ function calculate() {
   const target = rawTarget === null ? 1 : clampLevel(rawTarget);
   const pct = rawPct === null ? 0 : clampPercent(rawPct);
 
-  if (current < item.level) {
+  // ✅ mobs not locked by level
+  const isMobList = (activeSkillKey === "melee" || activeSkillKey === "mage");
+  if (!isMobList && current < item.level) {
     selectedItemKey = items[0].key;
     renderButtons();
     calculate();
@@ -697,7 +855,7 @@ function calculate() {
   const boostedXP = Math.floor(item.xp * mult);
 
   chosenP.textContent =
-    `Selected: ${item.name} (Lvl ${item.level}+), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}`;
+    `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}`;
 
   if (target <= current) {
     resultP.textContent = "Target level must be higher than current level.";
@@ -709,8 +867,8 @@ function calculate() {
   const nextBase = current < 120 ? levelXP[current + 1] : levelXP[120];
   const toNext = current < 120 ? nextBase - curBase : 0;
   const xpIntoLevel = current >= 120 ? 0 : Math.floor(toNext * (pct / 100));
-  const currentTotalXP = curBase + xpIntoLevel;
 
+  const currentTotalXP = curBase + xpIntoLevel;
   const targetTotalXP = levelXP[target];
   const xpNeeded = targetTotalXP - currentTotalXP;
 
@@ -742,7 +900,6 @@ function calculate() {
       // gather XP = sum(plantXP * qty) where the mat is a plant
       // brew XP = item.xp
       let gatherBoostedPerBrew = 0;
-
       for (const mat of ing) {
         const plant = getAlchemyPlantByName(mat.name);
         if (plant) {
@@ -763,7 +920,6 @@ function calculate() {
       const brewsNeeded = Math.ceil(xpNeeded / cycleXP);
       const totalXP = brewsNeeded * cycleXP;
 
-      // Match reference-ish output style
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total ${item.name}: ${fmt(brewsNeeded)}`;
       materialsTitle.textContent = "Totals";
 
@@ -774,13 +930,11 @@ function calculate() {
       const totals = new Map();
       for (const mat of ing) addCount(totals, mat.name, (mat.qty || 0) * brewsNeeded);
 
-      // Sort by qty desc
       const sorted = Array.from(totals.entries())
         .map(([name, qty]) => ({ name, qty }))
         .sort((a, b) => b.qty - a.qty);
 
       for (const r of sorted) addMaterialRow(`Total ${r.name}`, r.qty);
-
       return;
     }
 
@@ -815,9 +969,9 @@ function calculate() {
     if (smithingMode === "forge") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Total materials needed";
+
       addMaterialRow("Total forges", actionsNeeded);
 
-      // Build recipe map only for smelting items (so bars can expand to ores)
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
@@ -842,9 +996,11 @@ function calculate() {
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
+
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
+
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
 
@@ -854,6 +1010,7 @@ function calculate() {
     // Smelt mode
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Total materials needed";
+
     addMaterialRow("Total smelts", actionsNeeded);
 
     const smeltList = getItems(); // already filtered to smelt items
@@ -896,15 +1053,14 @@ function calculate() {
   if (skill.materialsMode === "recipe") {
     materialsTitle.textContent = "Total materials needed";
 
-    // ✅ SPECIAL: Spellbinding - keep Book count, and show book-mats separately (logs/leather)
     if (activeSkillKey === "spellbinding") {
       const recipeMap = buildRecipeMap(skill.items || []);
 
       // 1) Direct mats (Book / Essence / Relic / etc)
       const directTotals = new Map();
       let totalBooks = 0;
-
       const req = Array.isArray(item.materials) ? item.materials : [];
+
       for (const mat of req) {
         const qty = (mat.qty || 0) * actionsNeeded;
         addCount(directTotals, mat.name, qty);
@@ -928,13 +1084,14 @@ function calculate() {
 
         if (bookMats.size > 0) {
           addSectionRow("Mats needed to make books");
+
           const bookSorted = Array.from(bookMats.entries())
             .map(([name, qty]) => ({ name, qty }))
             .sort((a, b) => b.qty - a.qty);
+
           for (const r of bookSorted) addMaterialRow(r.name, r.qty);
         }
       }
-
       return;
     }
 
@@ -983,6 +1140,13 @@ tabs.forEach((btn) => {
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
+    } else if (activeSkillKey === "melee" || activeSkillKey === "mage") {
+      // ✅ keep mob letter in sync with first available mob
+      const list = getItems();
+      if (list.length) {
+        selectedItemKey = list[0].key;
+        mobLetterKey = getAlphaKey(list[0].name);
+      }
     } else {
       selectedItemKey = (skills[activeSkillKey].items || [])[0]?.key ?? "";
     }
@@ -1046,7 +1210,6 @@ document.querySelectorAll('input[name="setBonus"]').forEach((r) =>
 document.querySelectorAll('input[name="alchemyMode"]').forEach((r) =>
   r.addEventListener("change", () => {
     alchemyMode = r.value;
-
     if (activeSkillKey === "alchemy") {
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
