@@ -56,6 +56,9 @@ const materialsTitle = document.getElementById("materialsTitle");
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
 
+// ✅ NEW: relic icon element (so we can swap it for melee/mage)
+const relicIconImg = document.getElementById("relicIcon");
+
 const alchemyModeBox = document.getElementById("alchemyModeBox");
 const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
@@ -630,9 +633,20 @@ function renderHeader() {
     setBonusBox.style.display = (activeSkillKey === "melee" || activeSkillKey === "mage") ? "none" : "";
   }
 
+  // ✅ text changes (already existed)
   if (relicNameSpan) {
     relicNameSpan.textContent =
       (activeSkillKey === "melee" || activeSkillKey === "mage") ? "EXP Relic" : "Wisdom Relic";
+  }
+
+  // ✅ NEW: icon changes to match text
+  if (relicIconImg) {
+    const isExpRelic = (activeSkillKey === "melee" || activeSkillKey === "mage");
+    relicIconImg.src = isExpRelic
+      ? "./Boosts/relic_of_experience.png"
+      : "./Boosts/relic_of_wisdom.png";
+    relicIconImg.setAttribute("data-name", isExpRelic ? "relic_of_experience" : "relic_of_wisdom");
+    relicIconImg.alt = isExpRelic ? "EXP Relic" : "Wisdom Relic";
   }
 
   if (smithingInfernalBox) {
@@ -699,6 +713,7 @@ function renderButtons() {
 
   const isMobList = (activeSkillKey === "melee" || activeSkillKey === "mage");
 
+  // ✅ Only snap selection by level for NON-mob skills
   if (!isMobList) {
     const selected = getSelectedItem();
     if (cur < selected.level) {
@@ -840,7 +855,7 @@ function calculate() {
   const target = rawTarget === null ? 1 : clampLevel(rawTarget);
   const pct = rawPct === null ? 0 : clampPercent(rawPct);
 
-  // ✅ mobs not locked by level
+  // ✅ mobs are NOT locked by level
   const isMobList = (activeSkillKey === "melee" || activeSkillKey === "mage");
   if (!isMobList && current < item.level) {
     selectedItemKey = items[0].key;
@@ -972,6 +987,7 @@ function calculate() {
 
       addMaterialRow("Total forges", actionsNeeded);
 
+      // Build recipe map only for smelting items (so bars can expand to ores)
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
@@ -1053,6 +1069,7 @@ function calculate() {
   if (skill.materialsMode === "recipe") {
     materialsTitle.textContent = "Total materials needed";
 
+    // ✅ SPECIAL: Spellbinding - keep Book count, and show book-mats separately (logs/leather)
     if (activeSkillKey === "spellbinding") {
       const recipeMap = buildRecipeMap(skill.items || []);
 
