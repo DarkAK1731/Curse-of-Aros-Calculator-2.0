@@ -50,18 +50,14 @@
       <!-- Alchemy sub-tabs -->
       <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Alchemy mode</div>
-
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="gather_only" checked />
           Gather Only (Plants)
         </label>
-
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="brew_only" />
           Brew Only (Potions / Brews)
         </label>
-
-        <!-- ✅ NEW: Gather + Brew -->
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="gather_brew" />
           Gather + Brew
@@ -84,8 +80,7 @@
       <!-- Smithing forge bar tabs -->
       <div id="smithingBarBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Forge category</div>
-        <div id="smithingBarTabs" class="grid"
-             style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));"></div>
+        <div id="smithingBarTabs" class="grid"></div>
       </div>
 
       <div class="subtle" id="selectHint">
@@ -99,14 +94,22 @@
       <div class="boosts">
         <label class="toggle">
           <input id="worldBoost" type="checkbox" />
+          <img class="toggle-icon boost-icon" data-name="world_boost"
+               src="./Boosts/world_boost.png" alt="World Boost" loading="lazy" />
           World Boost (+50%)
         </label>
+
         <label class="toggle">
           <input id="bonusStars" type="checkbox" />
+          <img class="toggle-icon boost-icon" data-name="bonus_star"
+               src="./Boosts/bonus_star.png" alt="Bonus XP Stars" loading="lazy" />
           Bonus XP Stars (x2)
         </label>
+
         <label class="toggle">
           <input id="wisdomRelic" type="checkbox" />
+          <img class="toggle-icon boost-icon" data-name="relic_of_wisdom"
+               src="./Boosts/relic_of_wisdom.png" alt="Wisdom Relic" loading="lazy" />
           <span id="relicName">Wisdom Relic</span> (+5%)
         </label>
 
@@ -114,10 +117,14 @@
         <div id="smithingInfernalBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="infernalHammer" type="checkbox" />
+            <img class="toggle-icon boost-icon" data-name="infernal_hammer"
+                 src="./Boosts/infernal_hammer.png" alt="Infernal Hammer" loading="lazy" />
             Infernal Hammer (+4%)
           </label>
           <label class="toggle">
             <input id="infernalRing" type="checkbox" />
+            <img class="toggle-icon boost-icon" data-name="infernal_ring"
+                 src="./Boosts/infernal_ring.png" alt="Infernal Ring" loading="lazy" />
             Infernal Ring (+4%)
           </label>
         </div>
@@ -126,6 +133,8 @@
         <div id="miningProspectorBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="prospectorsNeck" type="checkbox" />
+            <img class="toggle-icon boost-icon" data-name="prospectors_necklace"
+                 src="./Boosts/prospectors_necklace.png" alt="Prospector's Necklace" loading="lazy" />
             Prospector's Neck (+5%)
           </label>
         </div>
@@ -160,15 +169,40 @@
     </section>
   </main>
 
-  <!-- ================= Support Link ================= -->
   <footer class="support-footer">
     <a href="https://buymeacoffee.com/ak1731" target="_blank" rel="noopener noreferrer">
       ☕ Support link if u want to donate &lt;3
     </a>
   </footer>
 
-  <!-- Scripts -->
   <script src="./data.js"></script>
   <script src="./script.js"></script>
+
+  <!-- ✅ Boost icon debugger (does NOT affect anything else) -->
+  <script>
+    (function () {
+      const imgs = document.querySelectorAll("img.boost-icon");
+      const bust = `v=${Date.now()}`;
+
+      imgs.forEach(async (img) => {
+        const original = img.getAttribute("src") || "";
+        const resolved = new URL(original, window.location.href).href;
+
+        img.src = original.includes("?") ? `${original}&${bust}` : `${original}?${bust}`;
+
+        // Log URL + HTTP status
+        try {
+          const r = await fetch(resolved, { cache: "no-store" });
+          console.log("[BOOST]", img.dataset.name, r.status, r.headers.get("content-type"), resolved);
+        } catch (e) {
+          console.error("[BOOST FETCH FAIL]", img.dataset.name, resolved, e);
+        }
+
+        img.addEventListener("error", () => {
+          console.error("[BOOST IMG ERROR]", img.dataset.name, resolved);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
