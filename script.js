@@ -1,4 +1,5 @@
 // script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge + ✅ Alchemy Gather+Brew
+// ✅ PLUS: Inventory Trips (Inventories needed) + Mining Bag tiers (Mining only)
 // ✅ Icons Completed:
 //    - Crafting:    ./Icons/Crafting/*.png
 //    - Mining:      ./Icons/Mining/*.png
@@ -24,6 +25,9 @@ let smithingBarKey = "bronze"; // bronze|iron|steel|crimsteel|silver|gold|mythan
 // ✅ Mobs alphabetical tab (Forge-style)
 let mobLetterKey = "A";
 
+// ✅ Mining bag tier (0=none, 1..3)
+let miningBagTier = 0;
+
 // ---------- Elements ----------
 const tabs = Array.from(document.querySelectorAll(".tab"));
 const skillTitle = document.getElementById("skillTitle");
@@ -40,6 +44,9 @@ const worldBoostInput = document.getElementById("worldBoost");
 const bonusStarsInput = document.getElementById("bonusStars");
 const wisdomRelicInput = document.getElementById("wisdomRelic");
 
+// ✅ Inventories output line (added in index.html)
+const inventoriesP = document.getElementById("inventories");
+
 // smithing-only boosts
 const smithingInfernalBox = document.getElementById("smithingInfernalBox");
 const infernalHammerInput = document.getElementById("infernalHammer");
@@ -48,6 +55,9 @@ const infernalRingInput = document.getElementById("infernalRing");
 // mining-only boost
 const miningProspectorBox = document.getElementById("miningProspectorBox");
 const prospectorsNeckInput = document.getElementById("prospectorsNeck");
+
+// ✅ Mining bag UI box (added in index.html)
+const miningBagBox = document.getElementById("miningBagBox");
 
 const materialsBox = document.getElementById("materialsBox");
 const materialsList = document.getElementById("materialsList");
@@ -70,6 +80,9 @@ const WORLD_MULT = 1.5;
 const STARS_MULT = 2;
 const INFERNAL_MULT = 1.04;
 const PROSPECTORS_NECK_MULT = 1.05;
+
+// Inventory constants
+const INV_SIZE = 36;
 
 // ---------- ICON MAPS ----------
 // Crafting icons
@@ -289,6 +302,102 @@ function normalizePercentInput(el) {
 }
 
 function fmt(n) { return Number(n).toLocaleString(); }
+
+// ✅ Inventories helpers (based on your rules)
+function clearInventories() {
+  if (inventoriesP) inventoriesP.textContent = "";
+}
+
+function getMiningBagExtraSlots(tier) {
+  if (!tier) return 0;
+  return Math.max(0, Math.min(3, tier)) * 6; // tier1=6, tier2=12, tier3=18
+}
+
+function getCapacityPerInventory(skillKey, item) {
+  // If we ever can't compute, return null
+  if (!item) return null;
+
+  // No inventories for combat tabs
+  if (skillKey === "melee" || skillKey === "mage") return null;
+
+  // Common: Skilling chest always takes 1 slot
+  const chestSlot = 1;
+
+  if (skillKey === "mining") {
+    // ✅ Naturite: you can *carry* more, but you can only MINE up to 100 per trip
+    // (mining stops once it would go past 100)
+    if (item.key === "naturite") return 100;
+
+    // Other ores are non-stackable (1 each). Mining bag adds extra slots but also takes 1 slot.
+    const bagSlot = miningBagTier > 0 ? 1 : 0; // you can only have one bag and it takes 1 space
+    const extra = getMiningBagExtraSlots(miningBagTier);
+
+    // base slots you can use + extra bag slots (mining only)
+    const usableSlots = Math.max(0, (INV_SIZE - chestSlot - bagSlot) + extra);
+    return usableSlots; // stackMax = 1
+  }
+
+  if (skillKey === "woodcutting") {
+    // non stackable, only chest reserved => 35 logs
+    return Math.max(0, INV_SIZE - chestSlot);
+  }
+
+  if (skillKey === "fishing") {
+    if (item.key === "bass") {
+      // bass needs 9 slots + chest (10 empty needed) => you can carry 26 bass
+      return 26;
+    }
+    // other fish: bait 1 + chest 1 => 34 fish
+    return 34;
+  }
+
+  if (skillKey === "crafting") {
+    // crafting takes 2 space: completed relic (stack) + chest => bring 34 logs
+    return 34;
+  }
+
+  if (skillKey === "spellbinding") {
+    // tailoring/spellbinding takes 4 space:
+    // chest + relic + completed tome + magic essence => 32 remaining
+    return 32;
+  }
+
+  if (skillKey === "alchemy") {
+    // ✅ Plants: you can *carry* more, but you can only GATHER up to 100 per trip
+    if (alchemyMode === "gather_only") return 100;
+
+    // For brewing modes, inventory depends on drops + mats, so we won't guess
+    return null;
+  }
+
+  if (skillKey === "cooking") {
+    // cooking requires 17 salt + 17 raw => leaves 2 slots (cooked + chest)
+    // so you can cook 17 per inventory trip
+    return 17;
+  }
+
+  // smithing (and any other unhandled) - not enough info for clean trip calc here
+  return null;
+}
+
+function setInventoriesNeeded(totalUnits, capacityPerInv, unitLabel) {
+  if (!inventoriesP) return;
+
+  if (!Number.isFinite(totalUnits) || totalUnits <= 0) {
+    inventoriesP.textContent = "";
+    return;
+  }
+
+  if (!capacityPerInv || capacityPerInv <= 0) {
+    inventoriesP.textContent = ""; // hide if not applicable
+    return;
+  }
+
+  const invs = Math.ceil(totalUnits / capacityPerInv);
+  const label = unitLabel ? ` (${unitLabel})` : "";
+  inventoriesP.textContent =
+    `Inventories needed: ${fmt(invs)} | Capacity: ${fmt(capacityPerInv)} per inventory${label}`;
+}
 
 // ✅ Mobs alpha helpers (Forge-style)
 function getAlphaKey(name) {
@@ -668,6 +777,15 @@ function renderHeader() {
     }
   }
 
+  // ✅ Show/hide Mining Bag UI
+  if (miningBagBox) {
+    if (activeSkillKey === "mining") {
+      miningBagBox.style.display = "";
+    } else {
+      miningBagBox.style.display = "none";
+    }
+  }
+
   if (alchemyModeBox) {
     alchemyModeBox.style.display = activeSkillKey === "alchemy" ? "" : "none";
   }
@@ -842,6 +960,7 @@ function calculate() {
     chosenP.textContent = "";
     resultP.textContent = "No items available.";
     materialsBox.classList.add("hidden");
+    clearInventories();
     return;
   }
 
@@ -875,6 +994,7 @@ function calculate() {
   if (target <= current) {
     resultP.textContent = "Target level must be higher than current level.";
     materialsBox.classList.add("hidden");
+    clearInventories();
     return;
   }
 
@@ -890,12 +1010,14 @@ function calculate() {
   if (xpNeeded <= 0) {
     resultP.textContent = "You already have enough XP for the target level.";
     materialsBox.classList.add("hidden");
+    clearInventories();
     return;
   }
 
   if (boostedXP <= 0) {
     resultP.textContent = "Boosted XP is 0. Check data values.";
     materialsBox.classList.add("hidden");
+    clearInventories();
     return;
   }
 
@@ -904,6 +1026,13 @@ function calculate() {
 
   materialsList.innerHTML = "";
   materialsBox.classList.remove("hidden");
+
+  // ✅ Default inventories (most skills)
+  {
+    const cap = getCapacityPerInventory(activeSkillKey, item);
+    // For crafting we label as "units" from skill label (e.g. fish/ore/log)
+    setInventoriesNeeded(actionsNeeded, cap, skill.unitsLabel ? skill.unitsLabel(item.name) : "");
+  }
 
   // ---- Alchemy special ----
   if (activeSkillKey === "alchemy") {
@@ -929,6 +1058,7 @@ function calculate() {
       if (cycleXP <= 0) {
         resultP.textContent = "Cycle XP is 0. Check plant/brew XP values.";
         materialsBox.classList.add("hidden");
+        clearInventories();
         return;
       }
 
@@ -950,6 +1080,9 @@ function calculate() {
         .sort((a, b) => b.qty - a.qty);
 
       for (const r of sorted) addMaterialRow(`Total ${r.name}`, r.qty);
+
+      // Brewing modes: inventory depends on farming drops + stacks => hide inventories line
+      clearInventories();
       return;
     }
 
@@ -969,6 +1102,9 @@ function calculate() {
         .sort((a, b) => b.qty - a.qty);
 
       for (const r of sorted) addMaterialRow(r.name, r.qty);
+
+      // Brewing mode inventory varies (drops/stacking), so hide it
+      clearInventories();
       return;
     }
 
@@ -976,11 +1112,18 @@ function calculate() {
     resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total plants: ${fmt(actionsNeeded)}`;
     materialsTitle.textContent = "Totals";
     addMaterialRow(item.name, actionsNeeded);
+
+    // ✅ For gather-only plants, inventories are valid (cap 100 per trip)
+    const cap = getCapacityPerInventory("alchemy", item);
+    setInventoriesNeeded(actionsNeeded, cap, `Total ${item.name}`);
     return;
   }
 
   // ---- Smithing special ----
   if (activeSkillKey === "smithing") {
+    // Smithing inventories not computed (depends on mining/stack rules for ores/bars + smelting)
+    clearInventories();
+
     if (smithingMode === "forge") {
       resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
       materialsTitle.textContent = "Total materials needed";
@@ -1135,6 +1278,7 @@ function calculate() {
   if (skill.materialsMode === "kills") {
     materialsTitle.textContent = "Totals";
     addMaterialRow("Total kills", actionsNeeded);
+    clearInventories();
     return;
   }
 
@@ -1251,6 +1395,14 @@ document.querySelectorAll('input[name="smithingMode"]').forEach((r) =>
       renderButtons();
       calculate();
     }
+  })
+);
+
+// ✅ Mining bag tier radios
+document.querySelectorAll('input[name="miningBagTier"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    miningBagTier = Number(r.value) || 0;
+    calculate();
   })
 );
 
