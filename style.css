@@ -13,37 +13,61 @@ html, body { min-height: 100%; }
   --accent2:rgba(59,130,246,.18);
   --shadow:0 20px 60px rgba(0,0,0,.35);
   --r:18px;
-  --skillGlow: rgba(255,255,255,.45); /* fallback */
-
-  /* ✅ BOOST ICON SIZES  */
-  --boostIconSize: 20px;       /* normal boost icon size */
-  --worldBoostIconSize: 20px;  /* world boost icon size (bigger) */
+  --skillGlow: rgba(255,255,255,.45);
+  --boostIconSize: 20px;
+  --worldBoostIconSize: 20px;
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+
+html,body{
+  height:100%;
+}
+
+/* ================= FULLSCREEN BACKGROUND FIX ================= */
 
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
   color:var(--text);
-  background:
-    radial-gradient(900px 600px at 10% 10%, rgba(59,130,246,.18), transparent 55%),
-    radial-gradient(900px 600px at 90% 20%, rgba(168,85,247,.14), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  position:relative;
+  z-index:0;
+  background: linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+
+/* Background image layer */
+body[data-skill]::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background: var(--skillBg, none) center center / cover no-repeat;
+  transform: scale(1.02);
+}
+
+/* Dark overlay */
+body[data-skill]::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background: linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35));
 }
 
 /* ================= HEADER ================= */
+
 .top{
   padding:22px 18px 6px;
   max-width:1100px;
   margin:0 auto;
 }
+
 h1{
   margin:0 0 14px;
   font-weight:800;
   letter-spacing:.2px;
 }
+
 .wrap{
   max-width:1100px;
   margin:0 auto;
@@ -51,11 +75,13 @@ h1{
 }
 
 /* ================= TABS ================= */
+
 .tabs{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
+
 .tab{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.04);
@@ -67,7 +93,9 @@ h1{
   font-weight:700;
   letter-spacing:.3px;
 }
+
 .tab:hover{ background:rgba(255,255,255,.06); }
+
 .tab.active{
   border-color: var(--skillGlow);
   box-shadow:
@@ -77,6 +105,7 @@ h1{
 }
 
 /* ================= PANELS ================= */
+
 .panel{
   background:var(--card);
   border:1px solid var(--stroke);
@@ -86,6 +115,7 @@ h1{
   box-shadow:var(--shadow);
   backdrop-filter: blur(10px);
 }
+
 h2{
   margin:0 0 12px;
   font-size:26px;
@@ -93,20 +123,24 @@ h2{
 }
 
 /* ================= INPUTS ================= */
+
 .levels{
   display:grid;
   grid-template-columns: repeat(2, minmax(180px, 1fr));
   gap:14px;
 }
+
 .field{
   display:flex;
   flex-direction:column;
   gap:8px;
 }
+
 .field span{
   color:var(--muted);
   font-size:14px;
 }
+
 input[type="number"]{
   width:100%;
   max-width:260px;
@@ -117,22 +151,26 @@ input[type="number"]{
   color:var(--text);
   outline:none;
 }
+
 input[type="number"]:focus{
   border-color: var(--skillGlow);
   box-shadow: 0 0 0 3px rgba(255,255,255,.08);
 }
 
 /* ================= BUTTON GRID ================= */
+
 .subtle{
   color:var(--muted2);
   font-size:14px;
   margin-bottom:10px;
 }
+
 .grid{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
+
 .item-btn{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.04);
@@ -147,11 +185,14 @@ input[type="number"]:focus{
   gap:10px;
   min-width:0;
 }
+
 .item-btn:hover{ background:rgba(255,255,255,.06); }
+
 .item-btn.locked{
   opacity:.35;
   cursor:not-allowed;
 }
+
 .item-btn.active{
   border-color: var(--skillGlow);
   box-shadow:
@@ -159,19 +200,19 @@ input[type="number"]:focus{
     0 0 12px var(--skillGlow);
 }
 
-/* ---- Item button icons ---- */
 .btn-icon{
   width:22px;
   height:22px;
   flex:0 0 22px;
   image-rendering: pixelated;
 }
+
 .btn-text{
   line-height:1;
   min-width:0;
 }
 
-/* Bigger icons for mobs (Melee + Mage) */
+/* Bigger mob icons */
 body[data-skill="melee"] .btn-icon,
 body[data-skill="mage"] .btn-icon{
   width:50px;
@@ -179,7 +220,8 @@ body[data-skill="mage"] .btn-icon{
   flex:0 0 50px;
 }
 
-/* ================= TOGGLES / BOOSTS ================= */
+/* ================= BOOSTS ================= */
+
 .toggle{
   display:flex;
   align-items:center;
@@ -187,12 +229,12 @@ body[data-skill="mage"] .btn-icon{
   margin:8px 0;
   color:var(--text);
 }
+
 .toggle input{
   width:18px;
   height:18px;
 }
 
-/* ✅ boost icons (default size) */
 .toggle-icon{
   width:var(--boostIconSize);
   height:var(--boostIconSize);
@@ -201,7 +243,6 @@ body[data-skill="mage"] .btn-icon{
   filter: drop-shadow(0 1px 1px rgba(0,0,0,.45));
 }
 
-/* ✅ World Boost icon ONLY (input then image) */
 #worldBoost + .toggle-icon{
   width:var(--worldBoostIconSize);
   height:var(--worldBoostIconSize);
@@ -209,22 +250,27 @@ body[data-skill="mage"] .btn-icon{
 }
 
 /* ================= RESULTS ================= */
+
 .chosen,.result{
   margin:10px 0;
   line-height:1.35;
 }
+
 .materials{
   margin-top:14px;
   padding-top:12px;
   border-top:1px solid var(--stroke);
 }
+
 .hidden{ display:none; }
+
 .mat-list{
   margin-top:10px;
   display:flex;
   flex-direction:column;
   gap:8px;
 }
+
 .mat-row{
   display:flex;
   justify-content:space-between;
@@ -234,16 +280,19 @@ body[data-skill="mage"] .btn-icon{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.03);
 }
+
 .mat-row b{ font-weight:700; }
 .mat-row span{ color:var(--muted); }
 
 /* ================= MOBILE ================= */
+
 @media (max-width:720px){
   .levels{ grid-template-columns:1fr; }
   input[type="number"]{ max-width:none; }
 }
 
 /* ================= SUPPORT FOOTER ================= */
+
 .support-footer{
   margin:6px auto 24px;
   text-align:center;
@@ -251,6 +300,7 @@ body[data-skill="mage"] .btn-icon{
   font-weight:600;
   opacity:.9;
 }
+
 .support-footer a{
   color:var(--muted);
   text-decoration:none;
@@ -258,191 +308,60 @@ body[data-skill="mage"] .btn-icon{
   align-items:center;
   gap:6px;
 }
+
 .support-footer a:hover{
   color:var(--text);
   text-decoration:underline;
 }
 
-/* ============================
-   Mobs A–Z layout fix (keeps list under letters)
-   ============================ */
-#itemButtons .mob-letter-tabs{
-  flex:0 0 100%;
-  width:100%;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:12px;
-}
-#itemButtons .alpha-grid{
-  flex:0 0 100%;
-  width:100%;
-}
-#itemButtons .mob-letter-tab{
-  padding:10px 12px;
-  border-radius:14px;
-}
-.alpha-group{
-  background:var(--card);
-  border:1px solid var(--stroke);
-  border-radius:var(--r);
-  box-shadow:var(--shadow);
-  backdrop-filter: blur(10px);
-  margin:12px 0;
-  overflow:hidden;
-  flex:0 0 100%;
-  width:100%;
-}
-.alpha-summary{
-  list-style:none;
-  cursor:pointer;
-  user-select:none;
-  padding:14px 16px;
-  font-weight:800;
-  letter-spacing:.5px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.alpha-summary::-webkit-details-marker{ display:none; }
-.alpha-summary::after{
-  content:"▾";
-  opacity:.8;
-  transform: rotate(0deg);
-  transition:.15s ease;
-}
-.alpha-group[open] .alpha-summary::after{ transform: rotate(180deg); }
-.alpha-grid{
-  padding:14px 16px 16px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
+/* ================= SKILL BACKGROUNDS ================= */
 
-@media (max-width: 720px){
-  body[data-skill="melee"] #itemButtons .alpha-grid,
-  body[data-skill="mage"]  #itemButtons .alpha-grid{
-    display:grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap:14px !important;
-  }
-  body[data-skill="melee"] #itemButtons .alpha-grid .item-btn,
-  body[data-skill="mage"]  #itemButtons .alpha-grid .item-btn{
-    width:100%;
-    padding:14px;
-    border-radius:18px;
-    gap:12px;
-    min-height:90px;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    overflow:hidden;
-  }
-  body[data-skill="melee"] #itemButtons .alpha-grid .btn-icon,
-  body[data-skill="mage"]  #itemButtons .alpha-grid .btn-icon{
-    width:40px;
-    height:40px;
-    flex:0 0 40px;
-  }
-  body[data-skill="melee"] #itemButtons .alpha-grid .btn-text,
-  body[data-skill="mage"]  #itemButtons .alpha-grid .btn-text{
-    font-size:14px;
-    line-height:1.25;
-    white-space:normal;
-    word-break:keep-all;
-    overflow-wrap:normal;
-    hyphens:none;
-    max-width:100%;
-    min-width:0;
-  }
-}
-
-/* ===================================================
-   SKILL GLOW + BACKGROUNDS
-   =================================================== */
-body[data-skill] h1,
-body[data-skill] h2{
-  text-shadow:
-    0 0 18px var(--skillGlow),
-    0 0 32px var(--skillGlow),
-    0 0 46px rgba(255,255,255,.10);
-}
-body[data-skill] .field span,
-body[data-skill] .subtle{
-  text-shadow: 0 1px 2px rgba(0,0,0,.55);
-}
-@media (min-width:721px){
-  body[data-skill]{ background-attachment: fixed; }
-}
-
-/* ---------- Skill Backgrounds ---------- */
 body[data-skill="alchemy"]{
   --skillGlow: rgba(170,120,255,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/alchemy_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/alchemy_bg.png");
 }
+
 body[data-skill="cooking"]{
   --skillGlow: rgba(255,170,90,.80);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/cooking_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/cooking_bg.png");
 }
+
 body[data-skill="crafting"]{
   --skillGlow: rgba(255,210,90,.80);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/crafting_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/crafting_bg.png");
 }
+
 body[data-skill="fishing"]{
   --skillGlow: rgba(0,180,255,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/fishing_png.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/fishing_png.png");
 }
+
 body[data-skill="mining"]{
   --skillGlow: rgba(140,180,255,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/mining_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/mining_bg.png");
 }
+
 body[data-skill="woodcutting"]{
   --skillGlow: rgba(80,200,120,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/woodcutting_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/woodcutting_bg.png");
 }
+
 body[data-skill="spellbinding"]{
   --skillGlow: rgba(200,120,255,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/spellbinding_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/spellbinding_bg.png");
 }
+
 body[data-skill="smithing"]{
   --skillGlow: rgba(255,120,60,.85);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/smithing_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/smithing_bg.png");
 }
+
 body[data-skill="melee"]{
   --skillGlow: rgba(255,90,90,.90);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/melee_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/melee_bg.png");
 }
+
 body[data-skill="mage"]{
   --skillGlow: rgba(140,120,255,.95);
-  background:
-    linear-gradient(180deg, rgba(7,11,18,.25), rgba(11,18,32,.35)),
-    url("./Images/mage_bg.png") center center / cover no-repeat,
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+  --skillBg: url("./Images/mage_bg.png");
 }
