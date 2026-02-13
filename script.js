@@ -219,7 +219,9 @@ function getSkillItemNameByKey(skillKey, itemKey) {
   if (skillKey === "alchemy") {
     const plants = Array.isArray(s.plants) ? s.plants : [];
     const brews = Array.isArray(s.brews) ? s.brews : [];
-    const found = plants.find((it) => it.key === itemKey) || brews.find((it) => it.key === itemKey);
+    const found =
+      plants.find((it) => it.key === itemKey) ||
+      brews.find((it) => it.key === itemKey);
     return found ? found.name : null;
   }
 
@@ -262,8 +264,12 @@ function getIconPathForItem(skillKey, itemKey) {
 }
 
 // ---------- Helpers ----------
-function clampLevel(n) { return Math.max(1, Math.min(120, Math.floor(n))); }
-function clampPercent(n) { return Math.max(0, Math.min(100, Math.floor(n))); }
+function clampLevel(n) {
+  return Math.max(1, Math.min(120, Math.floor(n)));
+}
+function clampPercent(n) {
+  return Math.max(0, Math.min(100, Math.floor(n)));
+}
 
 function readNumberInput(el) {
   const raw = (el.value ?? "").toString().trim();
@@ -301,7 +307,9 @@ function normalizePercentInput(el) {
   return fixed;
 }
 
-function fmt(n) { return Number(n).toLocaleString(); }
+function fmt(n) {
+  return Number(n).toLocaleString();
+}
 
 // ✅ Inventories helpers (based on your rules)
 function clearInventories() {
@@ -313,8 +321,8 @@ function getMiningBagExtraSlots(tier) {
   return Math.max(0, Math.min(3, tier)) * 6; // tier1=6, tier2=12, tier3=18
 }
 
+// ✅ FIXED + SAFE (Bass 34, Shark/Orca/GiantSquid 26)
 function getCapacityPerInventory(skillKey, item) {
-  // If we ever can't compute, return null
   if (!item) return null;
 
   // No inventories for combat tabs
@@ -324,8 +332,7 @@ function getCapacityPerInventory(skillKey, item) {
   const chestSlot = 1;
 
   if (skillKey === "mining") {
-    // ✅ Naturite: you can *carry* more, but you can only MINE up to 100 per trip
-    // (mining stops once it would go past 100)
+    // ✅ Naturite: you can carry any amount, but you can only MINE up to 100 per trip
     if (item.key === "naturite") return 100;
 
     // Other ores are non-stackable (1 each). Mining bag adds extra slots but also takes 1 slot.
@@ -343,11 +350,18 @@ function getCapacityPerInventory(skillKey, item) {
   }
 
   if (skillKey === "fishing") {
-    if (item.key === "bass") {
-      // bass needs 9 slots + chest (10 empty needed) => you can carry 26 bass
+    // Fish that require Bass as bait (Bass is non-stackable)
+    const bassBaitFish = ["shark", "orca", "giant_squid"];
+
+    if (bassBaitFish.includes(item.key)) {
+      // 9 bass slots + 1 skilling chest = 10 used
+      // 36 - 10 = 26 fish per inventory
       return 26;
     }
-    // other fish: bait 1 + chest 1 => 34 fish
+
+    // All other fish (INCLUDING Bass): bait is stackable (grasshoppers etc)
+    // 1 bait slot + 1 chest = 2 used
+    // 36 - 2 = 34 fish per inventory
     return 34;
   }
 
@@ -363,7 +377,7 @@ function getCapacityPerInventory(skillKey, item) {
   }
 
   if (skillKey === "alchemy") {
-    // ✅ Plants: you can *carry* more, but you can only GATHER up to 100 per trip
+    // ✅ Plants: you can carry more, but you can only GATHER up to 100 per trip
     if (alchemyMode === "gather_only") return 100;
 
     // For brewing modes, inventory depends on drops + mats, so we won't guess
@@ -420,11 +434,11 @@ function buildAlphabetGroups(items) {
     if (b === "#") return -1;
     return a.localeCompare(b);
   });
-  return letters.map(l => ({ letter: l, items: map.get(l) || [] }));
+  return letters.map((l) => ({ letter: l, items: map.get(l) || [] }));
 }
 
 function renderMobLetterTabs(groups) {
-  const letters = groups.map(g => g.letter);
+  const letters = groups.map((g) => g.letter);
   if (!letters.includes(mobLetterKey)) mobLetterKey = letters[0] || "A";
 
   const tabsWrap = document.createElement("div");
@@ -440,8 +454,9 @@ function renderMobLetterTabs(groups) {
     btn.addEventListener("click", () => {
       mobLetterKey = g.letter;
 
-      const list = (groups.find(x => x.letter === mobLetterKey)?.items) || [];
-      if (list.length && !list.some(i => i.key === selectedItemKey)) {
+      const list =
+        groups.find((x) => x.letter === mobLetterKey)?.items || [];
+      if (list.length && !list.some((i) => i.key === selectedItemKey)) {
         selectedItemKey = list[0].key;
       }
 
@@ -512,17 +527,23 @@ function getTotalMultiplier() {
   const relic = wisdomRelicInput.checked ? RELIC_MULT : 1;
 
   const infernalHammer =
-    (activeSkillKey === "smithing" && infernalHammerInput && infernalHammerInput.checked)
+    activeSkillKey === "smithing" &&
+    infernalHammerInput &&
+    infernalHammerInput.checked
       ? INFERNAL_MULT
       : 1;
 
   const infernalRing =
-    (activeSkillKey === "smithing" && infernalRingInput && infernalRingInput.checked)
+    activeSkillKey === "smithing" &&
+    infernalRingInput &&
+    infernalRingInput.checked
       ? INFERNAL_MULT
       : 1;
 
   const prospectorsNeck =
-    (activeSkillKey === "mining" && prospectorsNeckInput && prospectorsNeckInput.checked)
+    activeSkillKey === "mining" &&
+    prospectorsNeckInput &&
+    prospectorsNeckInput.checked
       ? PROSPECTORS_NECK_MULT
       : 1;
 
@@ -542,9 +563,14 @@ function getSkill() {
 
 // ✅ Alchemy helper: detect plant by name
 function getAlchemyPlantByName(name) {
-  const plants = (skills.alchemy && skills.alchemy.plants) ? skills.alchemy.plants : [];
+  const plants =
+    skills.alchemy && skills.alchemy.plants ? skills.alchemy.plants : [];
   const needle = String(name || "").trim().toLowerCase();
-  return plants.find(p => String(p.name || "").trim().toLowerCase() === needle) || null;
+  return (
+    plants.find(
+      (p) => String(p.name || "").trim().toLowerCase() === needle
+    ) || null
+  );
 }
 
 function isSmithingSmeltItem(it) {
@@ -562,8 +588,8 @@ function isSmithingSmeltItem(it) {
 
 function getSmithingForgeBarKey(it) {
   const mats = Array.isArray(it.materials) ? it.materials : [];
-  const matNames = mats.map(m => (m?.name || "").toLowerCase());
-  const has = (txt) => matNames.some(n => n.includes(txt));
+  const matNames = mats.map((m) => (m?.name || "").toLowerCase());
+  const has = (txt) => matNames.some((n) => n.includes(txt));
 
   if (has("bronze bar")) return "bronze";
   if (has("iron bar")) return "iron";
@@ -583,8 +609,13 @@ function getSmithingForgeBarKey(it) {
   if (nm.includes("steel")) return "steel";
 
   if (
-    nm.includes("sapphire") || nm.includes("ruby") || nm.includes("emerald") ||
-    nm.includes("arosite") || nm.includes("magnetite") || nm.includes("battle necklace") || nm.includes("ring")
+    nm.includes("sapphire") ||
+    nm.includes("ruby") ||
+    nm.includes("emerald") ||
+    nm.includes("arosite") ||
+    nm.includes("magnetite") ||
+    nm.includes("battle necklace") ||
+    nm.includes("ring")
   ) {
     if (has("silver")) return "silver";
     if (has("gold")) return "gold";
@@ -593,26 +624,36 @@ function getSmithingForgeBarKey(it) {
 }
 
 const SMITHING_BAR_ORDER = [
-  "bronze","iron","steel","crimsteel","silver","gold","mythan","cobalt","varaxite","magic","other"
+  "bronze",
+  "iron",
+  "steel",
+  "crimsteel",
+  "silver",
+  "gold",
+  "mythan",
+  "cobalt",
+  "varaxite",
+  "magic",
+  "other",
 ];
 
 const SMITHING_BAR_LABELS = {
-  bronze:"Bronze",
-  iron:"Iron",
-  steel:"Steel",
-  crimsteel:"Crimsteel",
-  silver:"Silver",
-  gold:"Gold",
-  mythan:"Mythan",
-  cobalt:"Cobalt",
-  varaxite:"Varaxite",
-  magic:"Magic",
-  other:"Other"
+  bronze: "Bronze",
+  iron: "Iron",
+  steel: "Steel",
+  crimsteel: "Crimsteel",
+  silver: "Silver",
+  gold: "Gold",
+  mythan: "Mythan",
+  cobalt: "Cobalt",
+  varaxite: "Varaxite",
+  magic: "Magic",
+  other: "Other",
 };
 
 function getSmithingForgeItemsAll() {
   const s = skills.smithing;
-  const all = (s && s.items) ? s.items : [];
+  const all = s && s.items ? s.items : [];
   return all.filter((it) => !isSmithingSmeltItem(it));
 }
 
@@ -624,7 +665,7 @@ function getSmithingForgeItemsForBar(barKey) {
 function getSmithingAvailableBarKeys() {
   const allForge = getSmithingForgeItemsAll();
   const set = new Set(allForge.map(getSmithingForgeBarKey));
-  return SMITHING_BAR_ORDER.filter(k => set.has(k));
+  return SMITHING_BAR_ORDER.filter((k) => set.has(k));
 }
 
 function getItems() {
@@ -634,8 +675,8 @@ function getItems() {
   // - gather_only => plants
   // - brew_only & gather_brew => brews (so Gather+Brew shows potions)
   if (activeSkillKey === "alchemy") {
-    if (alchemyMode === "gather_only") return (s.plants || []);
-    return (s.brews || []);
+    if (alchemyMode === "gather_only") return s.plants || [];
+    return s.brews || [];
   }
 
   if (activeSkillKey === "smithing") {
@@ -679,9 +720,15 @@ function addCount(store, name, qty) {
 }
 
 function expandMaterials(recipeMap, name, qty, out, depth = 0) {
-  if (depth > 12) { addCount(out, name, qty); return; }
+  if (depth > 12) {
+    addCount(out, name, qty);
+    return;
+  }
   const recipe = recipeMap.get(name);
-  if (!recipe) { addCount(out, name, qty); return; }
+  if (!recipe) {
+    addCount(out, name, qty);
+    return;
+  }
   for (const mat of recipe) {
     expandMaterials(recipeMap, mat.name, mat.qty * qty, out, depth + 1);
   }
@@ -1030,7 +1077,6 @@ function calculate() {
   // ✅ Default inventories (most skills)
   {
     const cap = getCapacityPerInventory(activeSkillKey, item);
-    // For crafting we label as "units" from skill label (e.g. fish/ore/log)
     setInventoriesNeeded(actionsNeeded, cap, skill.unitsLabel ? skill.unitsLabel(item.name) : "");
   }
 
@@ -1040,9 +1086,6 @@ function calculate() {
     if (alchemyMode === "gather_brew") {
       const ing = Array.isArray(item.materials) ? item.materials : [];
 
-      // per 1 brew:
-      // gather XP = sum(plantXP * qty) where the mat is a plant
-      // brew XP = item.xp
       let gatherBoostedPerBrew = 0;
       for (const mat of ing) {
         const plant = getAlchemyPlantByName(mat.name);
@@ -1071,7 +1114,6 @@ function calculate() {
       addMaterialRow("Total exp", totalXP);
       addMaterialRow(`Total ${item.name}`, brewsNeeded);
 
-      // Totals for all mats (plants + drops)
       const totals = new Map();
       for (const mat of ing) addCount(totals, mat.name, (mat.qty || 0) * brewsNeeded);
 
@@ -1081,7 +1123,6 @@ function calculate() {
 
       for (const r of sorted) addMaterialRow(`Total ${r.name}`, r.qty);
 
-      // Brewing modes: inventory depends on farming drops + stacks => hide inventories line
       clearInventories();
       return;
     }
@@ -1103,7 +1144,6 @@ function calculate() {
 
       for (const r of sorted) addMaterialRow(r.name, r.qty);
 
-      // Brewing mode inventory varies (drops/stacking), so hide it
       clearInventories();
       return;
     }
@@ -1113,7 +1153,6 @@ function calculate() {
     materialsTitle.textContent = "Totals";
     addMaterialRow(item.name, actionsNeeded);
 
-    // ✅ For gather-only plants, inventories are valid (cap 100 per trip)
     const cap = getCapacityPerInventory("alchemy", item);
     setInventoriesNeeded(actionsNeeded, cap, `Total ${item.name}`);
     return;
@@ -1121,7 +1160,6 @@ function calculate() {
 
   // ---- Smithing special ----
   if (activeSkillKey === "smithing") {
-    // Smithing inventories not computed (depends on mining/stack rules for ores/bars + smelting)
     clearInventories();
 
     if (smithingMode === "forge") {
@@ -1130,14 +1168,12 @@ function calculate() {
 
       addMaterialRow("Total forges", actionsNeeded);
 
-      // Build recipe map only for smelting items (so bars can expand to ores)
       const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
 
       const req = Array.isArray(item.materials) ? item.materials : [];
 
-      // 1) Direct forge requirements (bars/thread/logs/etc)
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, (mat.qty || 0) * actionsNeeded);
 
@@ -1147,7 +1183,6 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
-      // 2) One-step ore expansion for bars (bar -> ores)
       const oreTotals = new Map();
       for (const mat of req) {
         expandOneStep(smeltRecipeMap, mat.name, (mat.qty || 0) * actionsNeeded, oreTotals);
@@ -1172,7 +1207,7 @@ function calculate() {
 
     addMaterialRow("Total smelts", actionsNeeded);
 
-    const smeltList = getItems(); // already filtered to smelt items
+    const smeltList = getItems();
     const recipeMap = buildRecipeMap(smeltList);
 
     const totals = new Map();
@@ -1212,11 +1247,9 @@ function calculate() {
   if (skill.materialsMode === "recipe") {
     materialsTitle.textContent = "Total materials needed";
 
-    // ✅ SPECIAL: Spellbinding - keep Book count, and show book-mats separately (logs/leather)
     if (activeSkillKey === "spellbinding") {
       const recipeMap = buildRecipeMap(skill.items || []);
 
-      // 1) Direct mats (Book / Essence / Relic / etc)
       const directTotals = new Map();
       let totalBooks = 0;
       const req = Array.isArray(item.materials) ? item.materials : [];
@@ -1233,12 +1266,10 @@ function calculate() {
 
       for (const r of directSorted) addMaterialRow(r.name, r.qty);
 
-      // 2) Expand ONLY the books into base mats, separate section
       if (totalBooks > 0) {
         const bookMats = new Map();
         expandMaterials(recipeMap, "Book", totalBooks, bookMats);
 
-        // Remove intermediates if you don’t want them listed
         bookMats.delete("Book");
         bookMats.delete("Paper");
 
@@ -1255,7 +1286,6 @@ function calculate() {
       return;
     }
 
-    // Normal recipe mode (fully expand)
     const recipeMap = buildRecipeMap(skill.items || []);
     const totals = new Map();
 
@@ -1302,7 +1332,6 @@ tabs.forEach((btn) => {
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
     } else if (activeSkillKey === "melee" || activeSkillKey === "mage") {
-      // ✅ keep mob letter in sync with first available mob
       const list = getItems();
       if (list.length) {
         selectedItemKey = list[0].key;
