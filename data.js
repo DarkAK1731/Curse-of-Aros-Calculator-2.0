@@ -1,4 +1,4 @@
-// data.js (FULL + UPDATED Smithing smelt + forge items + new high-level bars/alloys)
+// data.js 
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -575,3 +575,6 @@ const skills = {
     ]
   },
 };
+
+window.levelXP = levelXP;
+window.skills = skills;
