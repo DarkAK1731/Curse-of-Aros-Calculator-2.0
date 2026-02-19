@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- index.html (FULL) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +7,12 @@
   <title>Curse of Aros Calculator</title>
   <link rel="stylesheet" href="style.css?v=3" />
 </head>
+
 <body>
   <header class="top">
     <h1>Curse of Aros Calculator</h1>
     <h2>By AK1731</h2>
+
     <nav class="tabs" aria-label="Skills">
       <button class="tab active" data-skill="fishing">Fishing</button>
       <button class="tab" data-skill="mining">Mining</button>
@@ -26,6 +28,96 @@
   </header>
 
   <main class="wrap">
+    <!-- ================= Player Stats (Highscores) ================= -->
+    <section class="panel" id="playerStatsPanel">
+      <h2>Player Stats</h2>
+      <div class="subtle">
+        Enter ur ign to load current stats and auto-fill current levels for each skill.
+      </div>
+
+      <div class="levels">
+        <label class="field">
+          <span>Username</span>
+          <input id="usernameInput" type="text" placeholder="e.g. AK1731" autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span>Mode</span>
+          <div class="grid">
+            <label class="toggle" style="margin:0;">
+              <input type="radio" name="hiscoreMode" value="normal" checked />
+              Normal
+            </label>
+            <label class="toggle" style="margin:0;">
+              <input type="radio" name="hiscoreMode" value="lonewolf" />
+              Lone Wolf
+            </label>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Action</span>
+          <div class="grid">
+            <button id="loadStatsBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
+              Load stats
+            </button>
+            <button id="clearStatsBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
+              Clear
+            </button>
+          </div>
+        </label>
+      </div>
+
+      <p id="statsStatus" class="result" style="margin-top:10px;"></p>
+
+      <!-- ================= Manual Overrides (this device) ================= -->
+      <!-- Collapsible = saves space, still keeps ALL the same IDs your script expects -->
+      <details class="materials" style="margin-top:12px;" id="overrideDetails">
+        <summary class="subtle" style="cursor:pointer;">
+          Manual overrides (saved on this device) — click to open
+        </summary>
+
+        <label class="toggle" style="margin:10px 0 6px;">
+          <input id="overrideEnabled" type="checkbox" />
+          Use my saved levels for this username (overrides highscores)
+        </label>
+
+        <div id="overrideGrid" class="override-grid" style="margin-top:10px;">
+          <label class="field"><span>Melee</span><input id="ov_melee" type="number" min="1" max="120" inputmode="numeric" /></label>
+          <label class="field"><span>Mage</span><input id="ov_mage" type="number" min="1" max="120" inputmode="numeric" /></label>
+
+          <label class="field"><span>Mining</span><input id="ov_mining" type="number" min="1" max="120" inputmode="numeric" /></label>
+          <label class="field"><span>Smithing</span><input id="ov_smithing" type="number" min="1" max="120" inputmode="numeric" /></label>
+
+          <label class="field"><span>Woodcutting</span><input id="ov_woodcutting" type="number" min="1" max="120" inputmode="numeric" /></label>
+          <label class="field"><span>Crafting</span><input id="ov_crafting" type="number" min="1" max="120" inputmode="numeric" /></label>
+
+          <label class="field"><span>Fishing</span><input id="ov_fishing" type="number" min="1" max="120" inputmode="numeric" /></label>
+          <label class="field"><span>Cooking</span><input id="ov_cooking" type="number" min="1" max="120" inputmode="numeric" /></label>
+
+          <label class="field"><span>Spellbinding</span><input id="ov_spellbinding" type="number" min="1" max="120" inputmode="numeric" /></label>
+          <label class="field"><span>Alchemy</span><input id="ov_alchemy" type="number" min="1" max="120" inputmode="numeric" /></label>
+        </div>
+
+        <div class="grid" style="margin-top:10px;">
+          <button id="saveOverridesBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
+            Save my levels
+          </button>
+          <button id="clearOverridesBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
+            Clear saved levels
+          </button>
+        </div>
+
+        <div class="subtle" style="margin-top:8px;">
+          Note: this saves only on <b>your device</b>. Other people cannot change it.
+        </div>
+      </details>
+
+      <div id="statsSummary" class="materials hidden" style="margin-top:10px;">
+        <div class="subtle">Summary</div>
+        <div id="statsSummaryList" class="mat-list"></div>
+      </div>
+    </section>
 
     <!-- ================= Levels ================= -->
     <section class="panel">
@@ -35,10 +127,12 @@
           <span id="currentLabel">Your Fishing Level</span>
           <input id="currentLevel" type="number" min="1" max="120" value="1" inputmode="numeric" />
         </label>
+
         <label class="field">
           <span id="targetLabel">Target Fishing Level</span>
           <input id="targetLevel" type="number" min="1" max="120" value="5" inputmode="numeric" />
         </label>
+
         <label class="field">
           <span id="currentXPLabel">Current XP % (0–100)</span>
           <input id="currentXP" type="number" min="0" max="100" value="0" inputmode="numeric" />
@@ -48,7 +142,6 @@
 
     <!-- ================= Item Selection ================= -->
     <section class="panel">
-
       <!-- Alchemy sub-tabs -->
       <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Alchemy mode</div>
@@ -88,14 +181,12 @@
       <div class="subtle" id="selectHint">
         Select an item (locked until you reach the required level)
       </div>
-
       <div id="itemButtons" class="grid"></div>
     </section>
 
     <!-- ================= Boosts ================= -->
     <section class="panel">
       <div class="boosts">
-
         <label class="toggle">
           <input id="worldBoost" type="checkbox" />
           <img class="toggle-icon boost-icon"
@@ -156,7 +247,7 @@
           </label>
         </div>
 
-        <!-- ✅ Mining Bag -->
+        <!-- Mining Bag -->
         <div id="miningBagBox" style="display:none; margin-top:6px;">
           <div class="subtle">Mining Bag</div>
           <label class="toggle">
@@ -193,7 +284,6 @@
             Tier 4 set (+12%)
           </label>
         </div>
-
       </div>
     </section>
 
@@ -201,8 +291,6 @@
     <section class="panel">
       <p id="chosen" class="chosen"></p>
       <p id="result" class="result"></p>
-
-      <!-- ✅ Inventories display -->
       <p id="inventories" class="result"></p>
 
       <div id="materialsBox" class="materials hidden">
@@ -211,6 +299,10 @@
       </div>
     </section>
 
+    <!-- optional debug panel (safe to remove) -->
+    <section class="panel" id="debugPanel" style="display:none;">
+      <p id="debugText" class="result"></p>
+    </section>
   </main>
 
   <footer class="support-footer">
@@ -219,7 +311,22 @@
     </a>
   </footer>
 
+  <!-- ✅ IMPORTANT: data first, then script -->
   <script src="./data.js"></script>
   <script src="./script.js"></script>
+
+  <!-- Optional: quick error output if scripts fail -->
+  <script>
+    (function () {
+      try {
+        if (typeof skills === "undefined") {
+          console.warn("skills is undefined: data.js may not have loaded or doesn't define skills.");
+        }
+        if (typeof levelXP === "undefined") {
+          console.warn("levelXP is undefined: ensure it's defined in data.js or load it before script.js.");
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
