@@ -452,3 +452,77 @@ body[data-skill="mage"]{
   width: 100%;
   margin-bottom: 10px;
 }
+
+/* ================= COMPACT MOBILE MODE ================= */
+@media (max-width: 720px){
+
+  /* Reduce overall spacing */
+  .wrap { padding: 8px 12px 24px; }
+  .top  { padding: 14px 12px 4px; }
+
+  /* Panels become tighter */
+  .panel{
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 14px;
+  }
+
+  /* Headings smaller */
+  h2{ font-size: 20px; margin-bottom: 8px; }
+
+  /* Tabs smaller + tighter */
+  .tabs{ gap: 8px; }
+  .tab{
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  /* Inputs take full width and are shorter */
+  input[type="number"],
+  input[type="text"]{
+    max-width: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .field span{ font-size: 13px; }
+
+  /* Levels layout already 1-column on mobile, but tighten gap */
+  .levels{ gap: 10px; }
+
+  /* Item buttons become compact */
+  .grid{ gap: 8px; }
+  .item-btn{
+    padding: 8px 10px;
+    border-radius: 12px;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  /* Default icons smaller */
+  .btn-icon{
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  /* Mobs icons smaller on mobile so the grid doesn’t explode */
+  body[data-skill="melee"] .btn-icon,
+  body[data-skill="mage"] .btn-icon{
+    width: 34px;
+    height: 34px;
+  }
+
+  /* A–Z mob tabs tighter */
+  .mob-letter-tabs{ gap: 6px; }
+  .mob-letter-tab{
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 999px;
+  }
+
+  /* Materials/summary rows tighter */
+  .mat-row{
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+}
