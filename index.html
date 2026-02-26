@@ -28,6 +28,7 @@
   </header>
 
   <main class="wrap">
+
     <!-- ================= Player Stats (Highscores) ================= -->
     <section class="panel" id="playerStatsPanel">
       <h2>Player Stats</h2>
@@ -71,7 +72,6 @@
       <p id="statsStatus" class="result" style="margin-top:10px;"></p>
 
       <!-- ================= Manual Overrides (this device) ================= -->
-      <!-- Collapsible = saves space, still keeps ALL the same IDs your script expects -->
       <details class="materials" style="margin-top:12px;" id="overrideDetails">
         <summary class="subtle" style="cursor:pointer;">
           Manual overrides (saved on this device) — click to open
@@ -85,16 +85,12 @@
         <div id="overrideGrid" class="override-grid" style="margin-top:10px;">
           <label class="field"><span>Melee</span><input id="ov_melee" type="number" min="1" max="120" inputmode="numeric" /></label>
           <label class="field"><span>Mage</span><input id="ov_mage" type="number" min="1" max="120" inputmode="numeric" /></label>
-
           <label class="field"><span>Mining</span><input id="ov_mining" type="number" min="1" max="120" inputmode="numeric" /></label>
           <label class="field"><span>Smithing</span><input id="ov_smithing" type="number" min="1" max="120" inputmode="numeric" /></label>
-
           <label class="field"><span>Woodcutting</span><input id="ov_woodcutting" type="number" min="1" max="120" inputmode="numeric" /></label>
           <label class="field"><span>Crafting</span><input id="ov_crafting" type="number" min="1" max="120" inputmode="numeric" /></label>
-
           <label class="field"><span>Fishing</span><input id="ov_fishing" type="number" min="1" max="120" inputmode="numeric" /></label>
           <label class="field"><span>Cooking</span><input id="ov_cooking" type="number" min="1" max="120" inputmode="numeric" /></label>
-
           <label class="field"><span>Spellbinding</span><input id="ov_spellbinding" type="number" min="1" max="120" inputmode="numeric" /></label>
           <label class="field"><span>Alchemy</span><input id="ov_alchemy" type="number" min="1" max="120" inputmode="numeric" /></label>
         </div>
@@ -114,7 +110,7 @@
       </details>
 
       <div id="statsSummary" class="materials hidden" style="margin-top:10px;">
-        <div class="subtle">Summary</div>
+        <div class="subtle">Loaded summary</div>
         <div id="statsSummaryList" class="mat-list"></div>
       </div>
     </section>
@@ -122,6 +118,7 @@
     <!-- ================= Levels ================= -->
     <section class="panel">
       <h2 id="skillTitle">Fishing</h2>
+
       <div class="levels">
         <label class="field">
           <span id="currentLabel">Your Fishing Level</span>
@@ -142,6 +139,7 @@
 
     <!-- ================= Item Selection ================= -->
     <section class="panel">
+
       <!-- Alchemy sub-tabs -->
       <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Alchemy mode</div>
@@ -187,7 +185,9 @@
     <!-- ================= Boosts ================= -->
     <section class="panel">
       <div class="boosts">
-        <label class="toggle">
+
+        <!-- World Boost -->
+        <label class="toggle" id="worldBoostRow">
           <input id="worldBoost" type="checkbox" />
           <img class="toggle-icon boost-icon"
                data-name="world_boost"
@@ -196,7 +196,8 @@
           World Boost (+50%)
         </label>
 
-        <label class="toggle">
+        <!-- Bonus XP Stars -->
+        <label class="toggle" id="bonusStarsRow">
           <input id="bonusStars" type="checkbox" />
           <img class="toggle-icon boost-icon"
                data-name="bonus_star"
@@ -205,6 +206,7 @@
           Bonus XP Stars (x2)
         </label>
 
+        <!-- Wisdom / EXP Relic -->
         <label class="toggle">
           <input id="wisdomRelic" type="checkbox" />
           <img id="relicIcon"
@@ -284,6 +286,7 @@
             Tier 4 set (+12%)
           </label>
         </div>
+
       </div>
     </section>
 
@@ -303,6 +306,7 @@
     <section class="panel" id="debugPanel" style="display:none;">
       <p id="debugText" class="result"></p>
     </section>
+
   </main>
 
   <footer class="support-footer">
