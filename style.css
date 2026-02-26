@@ -361,3 +361,94 @@ body[data-skill="mage"]{
   --skillGlow: rgba(140,120,255,.95);
   --skillBg: url("./Images/mage_bg.png");
 }
+
+/* ================= MOBS ICON SIZE CONTROL ================= */
+
+/* Default size for all mobs */
+.btn-icon-mob {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Individual mob adjustments (example) */
+.btn-icon-baby_dragon {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.btn-icon-baby_seedling {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.btn-icon-cactus_soldier {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.btn-icon-cow {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.btn-icon-chicken {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.btn-icon-gold_snake {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* For skilling */
+
+
+
+/* Fishing icons */
+.btn-icon-fishing {
+  width: 26px;
+  height: 26px;
+}
+
+/* Mining icons */
+.btn-icon-mining {
+  width: 30px;
+  height: 30px;
+}
+
+.btn-icon-ironbark {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.btn-icon-obsidian {
+  width: 40px !important;
+  height: 40px !important;
+}
+/* Woodcutting icons */
+.btn-icon-woodcutting {
+  width: 28px;
+  height: 28px;
+}
+
+/* Smithing */
+.btn-icon-smithing {
+  width: 32px;
+  height: 32px;
+}
+
+/* Force mob section layout to stack properly */
+.alpha-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Make the mob grid full width under the letters */
+.mob-letter-tabs {
+  width: 100%;
+  margin-bottom: 10px;
+}
