@@ -95,7 +95,7 @@ const usernameInput = document.getElementById("usernameInput");
 const loadStatsBtn = document.getElementById("loadStatsBtn");
 const clearStatsBtn = document.getElementById("clearStatsBtn");
 const statsStatus = document.getElementById("statsStatus");
-const statsSummary = document.getElementById("statsSummary");
+const statsSummaryDetails = document.getElementById("statsSummaryDetails");
 const statsSummaryList = document.getElementById("statsSummaryList");
 
 // Manual Overrides UI
@@ -1055,8 +1055,10 @@ function setStatsStatus(msg) {
 }
 
 function setStatsSummaryVisible(on) {
-  if (!statsSummary) return;
-  statsSummary.classList.toggle("hidden", !on);
+  if (!statsSummaryDetails) return;
+  statsSummaryDetails.classList.toggle("hidden", !on);
+
+  if (on) statsSummaryDetails.open = false;
 }
 
 function addStatsRow(label, value) {
