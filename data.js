@@ -1,4 +1,4 @@
-// data.js 
+// data.js (FULL + UPDATED Smithing smelt + forge items + new high-level bars/alloys)
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -281,7 +281,7 @@ const skills = {
       { key:"magic_bar",      name:"Magic Bar",      level:80, xp:400,  materials:[ {name:"Magic Ore", qty:9} ] },
 
       // ✅ FIXED: avoid self-recipe loop (name differs from ore name)
-      { key:"naturite_bar",   name:"Naturite Bar",   level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
+      { key:"naturite_bar",   name:"Naturite",   level:85, xp:5000, materials:[ {name:"Naturite", qty:1} ] },
 
       { key:"obsidian_bar",   name:"Obsidian Bar",   level:90, xp:5500, materials:[ {name:"Obsidian", qty:100} ] },
       { key:"defiled_alloy",  name:"Defiled Alloy",  level:90, xp:2500, materials:[ {name:"Obsidian Bar", qty:1}, {name:"Gold Bar", qty:1} ] },
@@ -576,5 +576,6 @@ const skills = {
   },
 };
 
+// Make sure other scripts can read these globals reliably:
 window.levelXP = levelXP;
 window.skills = skills;
