@@ -1,11 +1,22 @@
+// script.js (FULL) — CoA Calculator
+// Includes: boosts (World + Stars + Relic), set bonus, alchemy modes, smithing smelt/forge,
+// mining bag tiers, inventories needed, mobs A-Z tabs, highscores loader via Worker,
+// manual overrides per username+mode (localStorage), ✅ hides boosts in Lone Wolf mode,
+// ✅ and locks mode after a successful load (prevents switching to the wrong mode).
+
+// ---- SAFETY NORMALIZER (KEEP AT VERY TOP) ----
 (function normalizeSkills() {
-  if (skills?.magic && !skills?.mage) skills.mage = skills.magic;
-  for (const k of Object.keys(skills || {})) {
+  // if your data uses "magic" but your UI uses "mage"
+  if (typeof skills !== "undefined" && skills?.magic && !skills?.mage) skills.mage = skills.magic;
+
+  // ensure skills.<key>.items always exists
+  for (const k of Object.keys((typeof skills !== "undefined" ? skills : {}) || {})) {
     const s = skills[k];
     if (!s) continue;
 
     if (!Array.isArray(s.items)) s.items = [];
 
+    // alchemy uses plants/brews too
     if (k === "alchemy") {
       if (!Array.isArray(s.plants)) s.plants = [];
       if (!Array.isArray(s.brews)) s.brews = [];
@@ -13,37 +24,25 @@
   }
 })();
 
-// script.js (FULL) - Bonus XP Stars (x2) + Relic rounding style + Alchemy split + Smithing Smelt/Forge + ✅ Alchemy Gather+Brew
-// ✅ PLUS: Inventory Trips (Inventories needed) + Mining Bag tiers (Mining only)
-// ✅ PLUS: Player highscores loader (auto-fill levels + show summary)
-// ✅ PLUS: Manual Overrides (local, per-device, per-username+mode) to fix outdated highscores safely
-// ✅ Icons Completed:
-//    - Crafting:    ./Icons/Crafting/*.png
-//    - Mining:      ./Icons/Mining/*.png
-//    - Fishing:     ./Icons/Fishing/*.png
-//    - Woodcutting: ./Icons/Woodcutting/*.png
-//    - Tailoring:   ./Icons/Tailoring/*.png
-//    - Cooking:     ./Icons/Cooking/*.png
-//    - Alchemy:     ./Icons/Alchemy/*.png
-//    - Smithing:    ./Icons/Smithing/*.png
-//    - Mobs         ./Icons/Mobs/*.png
-
 // ---------- State ----------
 let activeSkillKey = "fishing";
-let selectedItemKey = (skills[activeSkillKey]?.items?.[0]?.key) || "";
+let selectedItemKey = (skills?.[activeSkillKey]?.items?.[0]?.key) || "";
 
-// ✅ Alchemy (3 modes)
+// Alchemy modes
 let alchemyMode = "gather_only"; // gather_only | brew_only | gather_brew
 
-// Smithing (2 modes)
+// Smithing modes
 let smithingMode = "smelt"; // smelt | forge
 let smithingBarKey = "bronze"; // bronze|iron|steel|crimsteel|silver|gold|mythan|cobalt|varaxite|magic|other
 
-// ✅ Mobs alphabetical tab (Forge-style)
+// Mobs alphabetical tab
 let mobLetterKey = "A";
 
-// ✅ Mining bag tier (0=none, 1..3)
+// Mining bag tier (0=none, 1..3)
 let miningBagTier = 0;
+
+// Mode lock (after successful load)
+let loadedAccountMode = null; // null | "normal" | "lonewolf"
 
 // ---------- Elements ----------
 const tabs = Array.from(document.querySelectorAll('button.tab[data-skill]'));
@@ -52,28 +51,30 @@ const currentLabel = document.getElementById("currentLabel");
 const targetLabel = document.getElementById("targetLabel");
 const selectHint = document.getElementById("selectHint");
 const itemButtonsDiv = document.getElementById("itemButtons");
+
 const currentLevelInput = document.getElementById("currentLevel");
 const targetLevelInput = document.getElementById("targetLevel");
 const currentXPInput = document.getElementById("currentXP");
+
 const chosenP = document.getElementById("chosen");
 const resultP = document.getElementById("result");
+
 const worldBoostInput = document.getElementById("worldBoost");
 const bonusStarsInput = document.getElementById("bonusStars");
 const wisdomRelicInput = document.getElementById("wisdomRelic");
 
-// ✅ Inventories output line (added in index.html)
+const worldBoostRow = document.getElementById("worldBoostRow");
+const bonusStarsRow = document.getElementById("bonusStarsRow");
+
 const inventoriesP = document.getElementById("inventories");
 
-// smithing-only boosts
 const smithingInfernalBox = document.getElementById("smithingInfernalBox");
 const infernalHammerInput = document.getElementById("infernalHammer");
 const infernalRingInput = document.getElementById("infernalRing");
 
-// mining-only boost
 const miningProspectorBox = document.getElementById("miningProspectorBox");
 const prospectorsNeckInput = document.getElementById("prospectorsNeck");
 
-// ✅ Mining bag UI box (added in index.html)
 const miningBagBox = document.getElementById("miningBagBox");
 
 const materialsBox = document.getElementById("materialsBox");
@@ -82,8 +83,6 @@ const materialsTitle = document.getElementById("materialsTitle");
 
 const setBonusBox = document.getElementById("setBonusBox");
 const relicNameSpan = document.getElementById("relicName");
-
-// ✅ NEW: relic icon element (so we can swap it for melee/mage)
 const relicIconImg = document.getElementById("relicIcon");
 
 const alchemyModeBox = document.getElementById("alchemyModeBox");
@@ -91,7 +90,7 @@ const smithingModeBox = document.getElementById("smithingModeBox");
 const smithingBarBox = document.getElementById("smithingBarBox");
 const smithingBarTabs = document.getElementById("smithingBarTabs");
 
-// ✅ Highscores UI elements (added in index.html)
+// Highscores UI
 const usernameInput = document.getElementById("usernameInput");
 const loadStatsBtn = document.getElementById("loadStatsBtn");
 const clearStatsBtn = document.getElementById("clearStatsBtn");
@@ -99,8 +98,7 @@ const statsStatus = document.getElementById("statsStatus");
 const statsSummary = document.getElementById("statsSummary");
 const statsSummaryList = document.getElementById("statsSummaryList");
 
-// ================= Manual Overrides (localStorage, per username+mode) =================
-// NOTE: These elements must exist in index.html for the UI, but code is guarded if missing.
+// Manual Overrides UI
 const overrideEnabledInput = document.getElementById("overrideEnabled");
 const saveOverridesBtn = document.getElementById("saveOverridesBtn");
 const clearOverridesBtn = document.getElementById("clearOverridesBtn");
@@ -108,19 +106,77 @@ const clearOverridesBtn = document.getElementById("clearOverridesBtn");
 const OV_KEYS = ["melee","mage","mining","smithing","woodcutting","crafting","fishing","cooking","spellbinding","alchemy"];
 const ovInputs = Object.fromEntries(OV_KEYS.map(k => [k, document.getElementById(`ov_${k}`)]));
 
-function normUser(u){ return String(u||"").trim().toLowerCase(); }
-function getModeSelected(){
+// ---------- Constants ----------
+const RELIC_MULT = 1.049925925925926;
+const WORLD_MULT = 1.5;
+const STARS_MULT = 2;
+const INFERNAL_MULT = 1.04;
+const PROSPECTORS_NECK_MULT = 1.05;
+
+const INV_SIZE = 36;
+
+// Cloudflare Worker base (proxy)
+const HISCORE_PROXY_BASE = "https://connecting.xlin1731.workers.dev";
+
+// ---------- Mode helpers ----------
+function getModeSelected() {
   return (document.querySelector('input[name="hiscoreMode"]:checked')?.value) || "normal";
 }
+
+function setModeSelected(mode) {
+  const radios = document.querySelectorAll('input[name="hiscoreMode"]');
+  radios.forEach(r => {
+    if (r.value === mode) r.checked = true;
+  });
+}
+
+function lockModeUI(modeOrNull) {
+  const radios = document.querySelectorAll('input[name="hiscoreMode"]');
+  if (!modeOrNull) {
+    radios.forEach(r => (r.disabled = false));
+    return;
+  }
+  radios.forEach(r => {
+    r.disabled = (r.value !== modeOrNull);
+    if (r.value === modeOrNull) r.checked = true;
+  });
+}
+
+function isStatsLoaded() {
+  const cache = window.__coaStatCache || {};
+  return Object.keys(cache).length > 0;
+}
+
+// ---------- Boost visibility (Normal vs Lone Wolf) ----------
+function updateBoostVisibilityByMode(forceMode) {
+  const mode = forceMode || getModeSelected();
+  const isLW = mode === "lonewolf";
+
+  if (worldBoostRow) worldBoostRow.style.display = isLW ? "none" : "";
+  if (bonusStarsRow) bonusStarsRow.style.display = isLW ? "none" : "";
+
+  if (isLW) {
+    if (worldBoostInput) worldBoostInput.checked = false;
+    if (bonusStarsInput) bonusStarsInput.checked = false;
+  }
+
+  calculate();
+}
+
+// ---------- Manual Overrides helpers ----------
+function normUser(u){ return String(u||"").trim().toLowerCase(); }
+
 function overridesStorageKey(username, mode){
   return `coa_overrides:${mode}:${normUser(username)}`;
 }
+
 function clampLvl(n){
   n = Number(n);
   if (!Number.isFinite(n)) return null;
   n = Math.floor(n);
   return Math.max(1, Math.min(120, n));
 }
+
 function loadOverrides(username, mode){
   try {
     const raw = localStorage.getItem(overridesStorageKey(username, mode));
@@ -130,12 +186,15 @@ function loadOverrides(username, mode){
     return null;
   }
 }
+
 function saveOverrides(username, mode, data){
   localStorage.setItem(overridesStorageKey(username, mode), JSON.stringify(data || {}));
 }
+
 function clearOverrides(username, mode){
   localStorage.removeItem(overridesStorageKey(username, mode));
 }
+
 function fillOverrideInputs(obj){
   for (const k of OV_KEYS){
     const el = ovInputs[k];
@@ -143,6 +202,7 @@ function fillOverrideInputs(obj){
     el.value = (obj && Number.isFinite(obj[k])) ? obj[k] : "";
   }
 }
+
 function readOverrideInputs(){
   const out = {};
   for (const k of OV_KEYS){
@@ -153,6 +213,7 @@ function readOverrideInputs(){
   }
   return out;
 }
+
 function refreshOverrideUI(){
   if (!usernameInput) return;
   const user = usernameInput.value || "";
@@ -161,18 +222,14 @@ function refreshOverrideUI(){
 }
 
 function applyOverridesToCache(username, mode){
-  // if UI not present, do nothing
   if (!overrideEnabledInput) return false;
-
-  const enabled = !!overrideEnabledInput.checked;
-  if (!enabled) return false;
+  if (!overrideEnabledInput.checked) return false;
 
   const ov = loadOverrides(username, mode);
   if (!ov) return false;
 
   window.__coaStatCache = window.__coaStatCache || {};
 
-  // Map manual values into cache keys used by your UI
   const map = {
     melee: "melee",
     mage: "mage",
@@ -190,33 +247,17 @@ function applyOverridesToCache(username, mode){
     if (!Number.isFinite(ov[src])) continue;
     window.__coaStatCache[dst] = window.__coaStatCache[dst] || {};
     window.__coaStatCache[dst].level = clampLevel(ov[src]);
-    // leave xp/rank as-is (if highscores gave them)
   }
 
-  // update current tab level immediately
   const cur = window.__coaStatCache[activeSkillKey]?.level;
-  if (Number.isFinite(cur)) {
+  if (Number.isFinite(cur) && currentLevelInput) {
     currentLevelInput.value = clampLevel(cur);
-    currentXPInput.value = 0;
+    if (currentXPInput) currentXPInput.value = 0;
   }
   return true;
 }
 
-// ---------- Constants ----------
-const RELIC_MULT = 1.049925925925926; // ~ +4.99259259%
-const WORLD_MULT = 1.5;
-const STARS_MULT = 2;
-const INFERNAL_MULT = 1.04;
-const PROSPECTORS_NECK_MULT = 1.05;
-
-// Inventory constants
-const INV_SIZE = 36;
-
-// ✅ Cloudflare Worker base (your proxy)  (IMPORTANT: ONLY DEFINE THIS ONCE)
-const HISCORE_PROXY_BASE = "https://connecting.xlin1731.workers.dev";
-
 // ---------- ICON MAPS ----------
-// Crafting icons
 const CRAFTING_ICON_MAP = {
   relic_accuracy: "./Icons/Crafting/Accuracy_Relic.png",
   relic_affliction: "./Icons/Crafting/Affliction_Relic.png",
@@ -236,7 +277,6 @@ const CRAFTING_ICON_MAP = {
   relic_wisdom: "./Icons/Crafting/Wisdom_Relic.png",
 };
 
-// Mining icons
 const MINING_ICON_MAP = {
   black_salt: "./Icons/Mining/Black_Salt.png",
   coal: "./Icons/Mining/Coal.png",
@@ -257,7 +297,6 @@ const MINING_ICON_MAP = {
   varaxium: "./Icons/Mining/Varaxium.png",
 };
 
-// Fishing icons
 const FISHING_ICON_MAP = {
   anchovies: "./Icons/Fishing/Anchovies.png",
   anglerfish: "./Icons/Fishing/Anglerfish.png",
@@ -279,7 +318,6 @@ const FISHING_ICON_MAP = {
   tuna: "./Icons/Fishing/Tuna.png",
 };
 
-// Woodcutting icons
 const WOODCUTTING_ICON_MAP = {
   pine: "./Icons/Woodcutting/Pine_Logs.png",
   dead: "./Icons/Woodcutting/Dead_Logs.png",
@@ -298,7 +336,6 @@ const WOODCUTTING_ICON_MAP = {
   limewood: "./Icons/Woodcutting/Lime_Wood.png",
 };
 
-// Tailoring / Spellbinding icons
 const TAILORING_ICON_MAP = {
   blizzard_tome: "./Icons/Tailoring/Blizzard_Tome.png",
   book: "./Icons/Tailoring/Book.png",
@@ -316,7 +353,6 @@ const TAILORING_ICON_MAP = {
   torture_tome: "./Icons/Tailoring/Torture_Tome.png",
 };
 
-// Cooking icons
 const COOKING_ICON_MAP = {
   bear_roast: "./Icons/Cooking/Bear_Roast.png",
   polar_bear_roast: "./Icons/Cooking/Polar_Bear_Roast.png",
@@ -337,13 +373,13 @@ const COOKING_ICON_MAP = {
   cooked_tuna: "./Icons/Cooking/Cooked_Tuna.png",
 };
 
-// ✅ AUTO FILENAME HELPERS (Alchemy + Smithing + Mobs)
+// ---------- Filename helpers ----------
 function nameToFilename(name) {
   return String(name || "").trim().replace(/ /g, "_") + ".png";
 }
 
 function getSkillItemNameByKey(skillKey, itemKey) {
-  const s = skills[skillKey];
+  const s = skills?.[skillKey];
   if (!s) return null;
 
   if (skillKey === "alchemy") {
@@ -360,7 +396,6 @@ function getSkillItemNameByKey(skillKey, itemKey) {
   return found ? found.name : null;
 }
 
-// ONE correct icon resolver
 function getIconPathForItem(skillKey, itemKey) {
   if (skillKey === "crafting") return CRAFTING_ICON_MAP[itemKey] || "";
   if (skillKey === "mining") return MINING_ICON_MAP[itemKey] || "";
@@ -390,11 +425,12 @@ function getIconPathForItem(skillKey, itemKey) {
   return "";
 }
 
-// ---------- Helpers ----------
+// ---------- Basic helpers ----------
 function clampLevel(n) { return Math.max(1, Math.min(120, Math.floor(n))); }
 function clampPercent(n) { return Math.max(0, Math.min(100, Math.floor(n))); }
 
 function readNumberInput(el) {
+  if (!el) return null;
   const raw = (el.value ?? "").toString().trim();
   if (raw === "") return null;
   const n = Number(raw);
@@ -432,7 +468,7 @@ function normalizePercentInput(el) {
 
 function fmt(n) { return Number(n).toLocaleString(); }
 
-// ✅ Inventories helpers
+// ---------- Inventories helpers ----------
 function clearInventories() {
   if (inventoriesP) inventoriesP.textContent = "";
 }
@@ -484,7 +520,6 @@ function setInventoriesNeeded(totalUnits, capacityPerInv, unitLabel) {
     inventoriesP.textContent = "";
     return;
   }
-
   if (!capacityPerInv || capacityPerInv <= 0) {
     inventoriesP.textContent = "";
     return;
@@ -496,7 +531,7 @@ function setInventoriesNeeded(totalUnits, capacityPerInv, unitLabel) {
     `Inventories needed: ${fmt(invs)} | Capacity: ${fmt(capacityPerInv)} per inventory${label}`;
 }
 
-// ✅ Mobs alpha helpers
+// ---------- Mobs A-Z helpers ----------
 function getAlphaKey(name) {
   const ch = String(name || "").trim().charAt(0).toUpperCase();
   return /[A-Z]/.test(ch) ? ch : "#";
@@ -535,12 +570,10 @@ function renderMobLetterTabs(groups) {
 
     btn.addEventListener("click", () => {
       mobLetterKey = g.letter;
-
       const list = groups.find((x) => x.letter === mobLetterKey)?.items || [];
       if (list.length && !list.some((i) => i.key === selectedItemKey)) {
         selectedItemKey = list[0].key;
       }
-
       renderButtons();
       calculate();
     });
@@ -600,9 +633,9 @@ function getSetMultiplier() {
 }
 
 function getTotalMultiplier() {
-  const stars = bonusStarsInput && bonusStarsInput.checked ? STARS_MULT : 1;
-  const world = worldBoostInput.checked ? WORLD_MULT : 1;
-  const relic = wisdomRelicInput.checked ? RELIC_MULT : 1;
+  const stars = (bonusStarsInput && bonusStarsInput.checked) ? STARS_MULT : 1;
+  const world = (worldBoostInput && worldBoostInput.checked) ? WORLD_MULT : 1;
+  const relic = (wisdomRelicInput && wisdomRelicInput.checked) ? RELIC_MULT : 1;
 
   const infernalHammer =
     (activeSkillKey === "smithing" && infernalHammerInput && infernalHammerInput.checked)
@@ -628,11 +661,10 @@ function getTotalMultiplier() {
 }
 
 // ---------- Data access ----------
-function getSkill() { return skills[activeSkillKey]; }
+function getSkill() { return skills?.[activeSkillKey]; }
 
-// ✅ Alchemy helper: detect plant by name
 function getAlchemyPlantByName(name) {
-  const plants = (skills.alchemy && skills.alchemy.plants) ? skills.alchemy.plants : [];
+  const plants = (skills?.alchemy && skills.alchemy.plants) ? skills.alchemy.plants : [];
   const needle = String(name || "").trim().toLowerCase();
   return plants.find(p => String(p.name || "").trim().toLowerCase() === needle) || null;
 }
@@ -689,7 +721,7 @@ const SMITHING_BAR_LABELS = {
 };
 
 function getSmithingForgeItemsAll() {
-  const s = skills.smithing;
+  const s = skills?.smithing;
   const all = (s && s.items) ? s.items : [];
   return all.filter((it) => !isSmithingSmeltItem(it));
 }
@@ -707,6 +739,7 @@ function getSmithingAvailableBarKeys() {
 
 function getItems() {
   const s = getSkill();
+  if (!s) return [];
 
   if (activeSkillKey === "alchemy") {
     if (alchemyMode === "gather_only") return (s.plants || []);
@@ -808,9 +841,11 @@ function renderHeader() {
   document.body.setAttribute("data-skill", activeSkillKey);
 
   const s = getSkill();
-  skillTitle.textContent = s.title;
-  currentLabel.textContent = s.currentLabel;
-  targetLabel.textContent = s.targetLabel;
+  if (!s) return;
+
+  if (skillTitle) skillTitle.textContent = s.title;
+  if (currentLabel) currentLabel.textContent = s.currentLabel;
+  if (targetLabel) targetLabel.textContent = s.targetLabel;
 
   if (setBonusBox) {
     setBonusBox.style.display = (activeSkillKey === "melee" || activeSkillKey === "mage") ? "none" : "";
@@ -865,28 +900,31 @@ function renderHeader() {
     smithingBarBox.style.display = (activeSkillKey === "smithing" && smithingMode === "forge") ? "" : "none";
   }
 
-  if (activeSkillKey === "alchemy") {
-    selectHint.textContent =
-      alchemyMode === "brew_only"
-        ? "Select a potion/brew to brew (locked until you reach the required level)"
-        : alchemyMode === "gather_brew"
-          ? "Select a potion/brew to gather plants + brew (locked until you reach the required level)"
-          : "Select a plant to gather (locked until you reach the required level)";
-  } else if (activeSkillKey === "smithing") {
-    selectHint.textContent =
-      smithingMode === "forge"
-        ? "Select equipment to forge (locked until you reach the required level)"
-        : "Select a bar/alloy to smelt (locked until you reach the required level)";
-  } else if (activeSkillKey === "melee" || activeSkillKey === "mage") {
-    selectHint.textContent = "Select a monster (no requirements)";
-  } else {
-    selectHint.textContent = s.selectHint;
+  if (selectHint) {
+    if (activeSkillKey === "alchemy") {
+      selectHint.textContent =
+        alchemyMode === "brew_only"
+          ? "Select a potion/brew to brew (locked until you reach the required level)"
+          : alchemyMode === "gather_brew"
+            ? "Select a potion/brew to gather plants + brew (locked until you reach the required level)"
+            : "Select a plant to gather (locked until you reach the required level)";
+    } else if (activeSkillKey === "smithing") {
+      selectHint.textContent =
+        smithingMode === "forge"
+          ? "Select equipment to forge (locked until you reach the required level)"
+          : "Select a bar/alloy to smelt (locked until you reach the required level)";
+    } else if (activeSkillKey === "melee" || activeSkillKey === "mage") {
+      selectHint.textContent = "Select a monster (no requirements)";
+    } else {
+      selectHint.textContent = s.selectHint;
+    }
   }
 
   renderSmithingBarTabs();
 }
 
 function renderButtons() {
+  if (!itemButtonsDiv) return;
   itemButtonsDiv.innerHTML = "";
   ensureValidSelection();
 
@@ -900,7 +938,7 @@ function renderButtons() {
 
   if (!isMobList) {
     const selected = getSelectedItem();
-    if (cur < selected.level) {
+    if (selected && cur < selected.level) {
       const firstAvail = items.find((i) => i.level <= cur) || items[0];
       selectedItemKey = firstAvail.key;
     }
@@ -927,9 +965,7 @@ function renderButtons() {
 
     const grid = document.createElement("div");
     grid.className = "grid alpha-grid";
-
     for (const it of list) grid.appendChild(buildMobButton(it));
-
     itemButtonsDiv.appendChild(grid);
     return;
   }
@@ -982,6 +1018,7 @@ function renderButtons() {
 
 // ---------- Materials UI ----------
 function addMaterialRow(name, qty) {
+  if (!materialsList) return;
   const row = document.createElement("div");
   row.className = "mat-row";
 
@@ -997,6 +1034,7 @@ function addMaterialRow(name, qty) {
 }
 
 function addSectionRow(title) {
+  if (!materialsList) return;
   const row = document.createElement("div");
   row.className = "mat-row";
 
@@ -1011,7 +1049,7 @@ function addSectionRow(title) {
   materialsList.appendChild(row);
 }
 
-// ---------- Highscores helpers (via Worker JSON) ----------
+// ---------- Highscores helpers ----------
 function setStatsStatus(msg) {
   if (statsStatus) statsStatus.textContent = msg || "";
 }
@@ -1059,9 +1097,9 @@ function applyStatsToInputs(data) {
   }
 
   const cur = window.__coaStatCache[activeSkillKey]?.level;
-  if (Number.isFinite(cur)) {
+  if (Number.isFinite(cur) && currentLevelInput) {
     currentLevelInput.value = clampLevel(cur);
-    currentXPInput.value = 0;
+    if (currentXPInput) currentXPInput.value = 0;
   }
 }
 
@@ -1088,15 +1126,16 @@ function calculate() {
   const skill = getSkill();
   const items = getItems();
 
-  if (!items.length) {
-    chosenP.textContent = "";
-    resultP.textContent = "No items available.";
-    materialsBox.classList.add("hidden");
+  if (!skill || !items.length) {
+    if (chosenP) chosenP.textContent = "";
+    if (resultP) resultP.textContent = "No items available.";
+    if (materialsBox) materialsBox.classList.add("hidden");
     clearInventories();
     return;
   }
 
   const item = getSelectedItem();
+  if (!item) return;
 
   const rawCurrent = readNumberInput(currentLevelInput);
   const rawTarget = readNumberInput(targetLevelInput);
@@ -1117,16 +1156,19 @@ function calculate() {
   const mult = getTotalMultiplier();
   const boostedXP = Math.floor(item.xp * mult);
 
-  chosenP.textContent =
-    `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}`;
+  if (chosenP) {
+    chosenP.textContent =
+      `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}`;
+  }
 
   if (target <= current) {
-    resultP.textContent = "Target level must be higher than current level.";
-    materialsBox.classList.add("hidden");
+    if (resultP) resultP.textContent = "Target level must be higher than current level.";
+    if (materialsBox) materialsBox.classList.add("hidden");
     clearInventories();
     return;
   }
 
+  // needs levelXP defined in data.js
   const curBase = levelXP[current];
   const nextBase = current < 120 ? levelXP[current + 1] : levelXP[120];
   const toNext = current < 120 ? nextBase - curBase : 0;
@@ -1137,23 +1179,23 @@ function calculate() {
   const xpNeeded = targetTotalXP - currentTotalXP;
 
   if (xpNeeded <= 0) {
-    resultP.textContent = "You already have enough XP for the target level.";
-    materialsBox.classList.add("hidden");
+    if (resultP) resultP.textContent = "You already have enough XP for the target level.";
+    if (materialsBox) materialsBox.classList.add("hidden");
     clearInventories();
     return;
   }
 
   if (boostedXP <= 0) {
-    resultP.textContent = "Boosted XP is 0. Check data values.";
-    materialsBox.classList.add("hidden");
+    if (resultP) resultP.textContent = "Boosted XP is 0. Check data values.";
+    if (materialsBox) materialsBox.classList.add("hidden");
     clearInventories();
     return;
   }
 
   const actionsNeeded = Math.ceil(xpNeeded / boostedXP);
 
-  materialsList.innerHTML = "";
-  materialsBox.classList.remove("hidden");
+  if (materialsList) materialsList.innerHTML = "";
+  if (materialsBox) materialsBox.classList.remove("hidden");
 
   // Default inventories
   {
@@ -1165,8 +1207,8 @@ function calculate() {
   if (activeSkillKey === "alchemy") {
     if (alchemyMode === "gather_brew") {
       const ing = Array.isArray(item.materials) ? item.materials : [];
-
       let gatherBoostedPerBrew = 0;
+
       for (const mat of ing) {
         const plant = getAlchemyPlantByName(mat.name);
         if (plant) {
@@ -1179,8 +1221,8 @@ function calculate() {
       const cycleXP = gatherBoostedPerBrew + brewBoosted;
 
       if (cycleXP <= 0) {
-        resultP.textContent = "Cycle XP is 0. Check plant/brew XP values.";
-        materialsBox.classList.add("hidden");
+        if (resultP) resultP.textContent = "Cycle XP is 0. Check plant/brew XP values.";
+        if (materialsBox) materialsBox.classList.add("hidden");
         clearInventories();
         return;
       }
@@ -1188,8 +1230,8 @@ function calculate() {
       const brewsNeeded = Math.ceil(xpNeeded / cycleXP);
       const totalXP = brewsNeeded * cycleXP;
 
-      resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total ${item.name}: ${fmt(brewsNeeded)}`;
-      materialsTitle.textContent = "Totals";
+      if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total ${item.name}: ${fmt(brewsNeeded)}`;
+      if (materialsTitle) materialsTitle.textContent = "Totals";
 
       addMaterialRow("Total exp", totalXP);
       addMaterialRow(`Total ${item.name}`, brewsNeeded);
@@ -1208,8 +1250,8 @@ function calculate() {
     }
 
     if (alchemyMode === "brew_only") {
-      resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total brews: ${fmt(actionsNeeded)}`;
-      materialsTitle.textContent = "Totals";
+      if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total brews: ${fmt(actionsNeeded)}`;
+      if (materialsTitle) materialsTitle.textContent = "Totals";
 
       addMaterialRow("Total brews", actionsNeeded);
 
@@ -1227,8 +1269,8 @@ function calculate() {
       return;
     }
 
-    resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total plants: ${fmt(actionsNeeded)}`;
-    materialsTitle.textContent = "Totals";
+    if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total plants: ${fmt(actionsNeeded)}`;
+    if (materialsTitle) materialsTitle.textContent = "Totals";
     addMaterialRow(item.name, actionsNeeded);
 
     const cap = getCapacityPerInventory("alchemy", item);
@@ -1241,17 +1283,16 @@ function calculate() {
     clearInventories();
 
     if (smithingMode === "forge") {
-      resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
-      materialsTitle.textContent = "Total materials needed";
+      if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total forges: ${fmt(actionsNeeded)}`;
+      if (materialsTitle) materialsTitle.textContent = "Total materials needed";
 
       addMaterialRow("Total forges", actionsNeeded);
 
-      const smithAll = (skills.smithing && skills.smithing.items) ? skills.smithing.items : [];
+      const smithAll = (skills?.smithing && skills.smithing.items) ? skills.smithing.items : [];
       const smeltItems = smithAll.filter(isSmithingSmeltItem);
       const smeltRecipeMap = buildRecipeMap(smeltItems);
 
       const req = Array.isArray(item.materials) ? item.materials : [];
-
       const directTotals = new Map();
       for (const mat of req) addCount(directTotals, mat.name, (mat.qty || 0) * actionsNeeded);
 
@@ -1268,19 +1309,17 @@ function calculate() {
 
       if (oreTotals.size > 0) {
         addSectionRow("Ores needed (from smelting)");
-
         const oreSorted = Array.from(oreTotals.entries())
           .map(([name, qty]) => ({ name, qty }))
           .sort((a, b) => b.qty - a.qty);
-
         for (const r of oreSorted) addMaterialRow(r.name, r.qty);
       }
 
       return;
     }
 
-    resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
-    materialsTitle.textContent = "Total materials needed";
+    if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | Total smelts: ${fmt(actionsNeeded)}`;
+    if (materialsTitle) materialsTitle.textContent = "Total materials needed";
 
     addMaterialRow("Total smelts", actionsNeeded);
 
@@ -1305,10 +1344,10 @@ function calculate() {
   }
 
   // ---- Default behaviour ----
-  resultP.textContent = `XP needed: ${fmt(xpNeeded)} | ${skill.unitsLabel(item.name)}: ${fmt(actionsNeeded)}`;
+  if (resultP) resultP.textContent = `XP needed: ${fmt(xpNeeded)} | ${skill.unitsLabel(item.name)}: ${fmt(actionsNeeded)}`;
 
   if (skill.materialsMode === "simple") {
-    materialsTitle.textContent = "Total materials needed";
+    if (materialsTitle) materialsTitle.textContent = "Total materials needed";
     const baitName = item.meta?.bait ?? "Bait";
     addMaterialRow(item.name, actionsNeeded);
     addMaterialRow(baitName, actionsNeeded);
@@ -1316,21 +1355,20 @@ function calculate() {
   }
 
   if (skill.materialsMode === "single") {
-    materialsTitle.textContent = "Total materials needed";
+    if (materialsTitle) materialsTitle.textContent = "Total materials needed";
     addMaterialRow(item.name, actionsNeeded);
     return;
   }
 
   if (skill.materialsMode === "recipe") {
-    materialsTitle.textContent = "Total materials needed";
+    if (materialsTitle) materialsTitle.textContent = "Total materials needed";
 
     if (activeSkillKey === "spellbinding") {
       const recipeMap = buildRecipeMap(skill.items || []);
-
       const directTotals = new Map();
       let totalBooks = 0;
-      const req = Array.isArray(item.materials) ? item.materials : [];
 
+      const req = Array.isArray(item.materials) ? item.materials : [];
       for (const mat of req) {
         const qty = (mat.qty || 0) * actionsNeeded;
         addCount(directTotals, mat.name, qty);
@@ -1346,17 +1384,14 @@ function calculate() {
       if (totalBooks > 0) {
         const bookMats = new Map();
         expandMaterials(recipeMap, "Book", totalBooks, bookMats);
-
         bookMats.delete("Book");
         bookMats.delete("Paper");
 
         if (bookMats.size > 0) {
           addSectionRow("Mats needed to make books");
-
           const bookSorted = Array.from(bookMats.entries())
             .map(([name, qty]) => ({ name, qty }))
             .sort((a, b) => b.qty - a.qty);
-
           for (const r of bookSorted) addMaterialRow(r.name, r.qty);
         }
       }
@@ -1383,13 +1418,13 @@ function calculate() {
   }
 
   if (skill.materialsMode === "kills") {
-    materialsTitle.textContent = "Totals";
+    if (materialsTitle) materialsTitle.textContent = "Totals";
     addMaterialRow("Total kills", actionsNeeded);
     clearInventories();
     return;
   }
 
-  materialsBox.classList.add("hidden");
+  if (materialsBox) materialsBox.classList.add("hidden");
 }
 
 // ---------- Events ----------
@@ -1398,9 +1433,9 @@ tabs.forEach((btn) => {
     activeSkillKey = btn.dataset.skill;
 
     const cache = window.__coaStatCache || {};
-    if (cache[activeSkillKey]?.level) {
+    if (cache[activeSkillKey]?.level && currentLevelInput) {
       currentLevelInput.value = clampLevel(cache[activeSkillKey].level);
-      currentXPInput.value = 0;
+      if (currentXPInput) currentXPInput.value = 0;
     }
 
     if (activeSkillKey === "alchemy") {
@@ -1410,7 +1445,6 @@ tabs.forEach((btn) => {
       smithingMode = "smelt";
       const smeltRadio = document.querySelector('input[name="smithingMode"][value="smelt"]');
       if (smeltRadio) smeltRadio.checked = true;
-
       smithingBarKey = "bronze";
       const list = getItems();
       selectedItemKey = list.length ? list[0].key : selectedItemKey;
@@ -1421,55 +1455,58 @@ tabs.forEach((btn) => {
         mobLetterKey = getAlphaKey(list[0].name);
       }
     } else {
-      selectedItemKey = (skills[activeSkillKey].items || [])[0]?.key ?? "";
+      selectedItemKey = (skills?.[activeSkillKey]?.items || [])[0]?.key ?? "";
     }
 
     renderTabs();
     renderHeader();
 
-    if (!targetLevelInput.value) targetLevelInput.value = 5;
-    if (!currentXPInput.value) currentXPInput.value = 0;
+    if (targetLevelInput && !targetLevelInput.value) targetLevelInput.value = 5;
+    if (currentXPInput && !currentXPInput.value) currentXPInput.value = 0;
 
     renderButtons();
     calculate();
   });
 });
 
-currentLevelInput.addEventListener("input", () => {
-  enforceLevelBoundsLive(currentLevelInput);
-  renderButtons();
-  calculate();
-});
+if (currentLevelInput) {
+  currentLevelInput.addEventListener("input", () => {
+    enforceLevelBoundsLive(currentLevelInput);
+    renderButtons();
+    calculate();
+  });
+  currentLevelInput.addEventListener("blur", () => {
+    normalizeLevelInput(currentLevelInput);
+    renderButtons();
+    calculate();
+  });
+}
 
-targetLevelInput.addEventListener("input", () => {
-  enforceLevelBoundsLive(targetLevelInput);
-  calculate();
-});
+if (targetLevelInput) {
+  targetLevelInput.addEventListener("input", () => {
+    enforceLevelBoundsLive(targetLevelInput);
+    calculate();
+  });
+  targetLevelInput.addEventListener("blur", () => {
+    normalizeLevelInput(targetLevelInput);
+    calculate();
+  });
+}
 
-currentXPInput.addEventListener("input", () => {
-  enforcePercentBoundsLive(currentXPInput);
-  calculate();
-});
+if (currentXPInput) {
+  currentXPInput.addEventListener("input", () => {
+    enforcePercentBoundsLive(currentXPInput);
+    calculate();
+  });
+  currentXPInput.addEventListener("blur", () => {
+    normalizePercentInput(currentXPInput);
+    calculate();
+  });
+}
 
-currentLevelInput.addEventListener("blur", () => {
-  normalizeLevelInput(currentLevelInput);
-  renderButtons();
-  calculate();
-});
-
-targetLevelInput.addEventListener("blur", () => {
-  normalizeLevelInput(targetLevelInput);
-  calculate();
-});
-
-currentXPInput.addEventListener("blur", () => {
-  normalizePercentInput(currentXPInput);
-  calculate();
-});
-
-worldBoostInput.addEventListener("change", calculate);
+if (worldBoostInput) worldBoostInput.addEventListener("change", calculate);
 if (bonusStarsInput) bonusStarsInput.addEventListener("change", calculate);
-wisdomRelicInput.addEventListener("change", calculate);
+if (wisdomRelicInput) wisdomRelicInput.addEventListener("change", calculate);
 
 if (infernalHammerInput) infernalHammerInput.addEventListener("change", calculate);
 if (infernalRingInput) infernalRingInput.addEventListener("change", calculate);
@@ -1516,29 +1553,34 @@ document.querySelectorAll('input[name="miningBagTier"]').forEach((r) =>
   })
 );
 
-// ✅ Highscores events
+// Highscores events
 if (loadStatsBtn && usernameInput) {
   loadStatsBtn.addEventListener("click", async () => {
     try {
-      const mode = (document.querySelector('input[name="hiscoreMode"]:checked')?.value) || "normal";
+      const mode = getModeSelected();
       const user = usernameInput.value || "";
+
+      // Hide boosts immediately if LW selected
+      updateBoostVisibilityByMode(mode);
 
       setStatsStatus("Loading highscores...");
       if (statsSummaryList) statsSummaryList.innerHTML = "";
       setStatsSummaryVisible(false);
 
-    const data = await loadHighscoresForUser(user, mode);
+      const data = await loadHighscoresForUser(user, mode);
 
-    applyStatsToInputs(data);
+      // ✅ success => lock mode to what you loaded
+      loadedAccountMode = mode;
+      lockModeUI(loadedAccountMode);
 
-      // Manual overrides 
+      applyStatsToInputs(data);
+
+      // Manual overrides apply on top
       refreshOverrideUI();
       applyOverridesToCache(user, mode);
 
       const cache = window.__coaStatCache || {};
-      if (Object.keys(cache).length === 0) {
-        throw new Error("Loaded but no skill rows were cached.");
-      }
+      if (Object.keys(cache).length === 0) throw new Error("Loaded but no skill rows were cached.");
 
       setStatsSummaryVisible(true);
 
@@ -1558,10 +1600,13 @@ if (loadStatsBtn && usernameInput) {
         addStatsRow(`${k[0].toUpperCase()}${k.slice(1)} lvl`, fmt(lvl));
       }
 
-      if (cache[activeSkillKey]?.level) {
+      if (cache[activeSkillKey]?.level && currentLevelInput) {
         currentLevelInput.value = clampLevel(cache[activeSkillKey].level);
-        currentXPInput.value = 0;
+        if (currentXPInput) currentXPInput.value = 0;
       }
+
+      // Ensure boosts reflect current mode after load
+      updateBoostVisibilityByMode(mode);
 
       setStatsStatus("Loaded! Current level auto-filled for the selected tab. (Switch tabs to auto-fill others.)");
       renderButtons();
@@ -1569,6 +1614,10 @@ if (loadStatsBtn && usernameInput) {
     } catch (e) {
       console.error(e);
       setStatsSummaryVisible(false);
+
+      // if load failed, don't lock mode
+      loadedAccountMode = null;
+      lockModeUI(null);
 
       const msg = String(e?.message || e || "Failed.");
       setStatsStatus(
@@ -1582,14 +1631,20 @@ if (loadStatsBtn && usernameInput) {
 if (clearStatsBtn) {
   clearStatsBtn.addEventListener("click", () => {
     window.__coaStatCache = {};
+    loadedAccountMode = null;
+    lockModeUI(null);
+
     if (usernameInput) usernameInput.value = "";
     setStatsStatus("");
     if (statsSummaryList) statsSummaryList.innerHTML = "";
     setStatsSummaryVisible(false);
+
+    // still keep LW hiding if LW selected
+    updateBoostVisibilityByMode(getModeSelected());
   });
 }
 
-// ================= Manual Overrides Events =================
+// Manual Overrides events
 if (saveOverridesBtn && usernameInput) {
   saveOverridesBtn.addEventListener("click", () => {
     const user = usernameInput.value || "";
@@ -1640,10 +1695,35 @@ if (overrideEnabledInput) {
 }
 
 if (usernameInput) {
-  usernameInput.addEventListener("input", refreshOverrideUI);
+  usernameInput.addEventListener("input", () => {
+    refreshOverrideUI();
+    // if user changes username, unlock mode until they load again
+    if (isStatsLoaded()) {
+      window.__coaStatCache = {};
+      loadedAccountMode = null;
+      lockModeUI(null);
+      setStatsSummaryVisible(false);
+      if (statsSummaryList) statsSummaryList.innerHTML = "";
+      setStatsStatus("Username changed — load stats again.");
+    }
+  });
 }
+
+// Mode change handler:
+// - before load: allowed
+// - after load: blocked (because we lock radios anyway, but this adds a clear message)
 document.querySelectorAll('input[name="hiscoreMode"]').forEach((r) =>
-  r.addEventListener("change", refreshOverrideUI)
+  r.addEventListener("change", () => {
+    // if already loaded, prevent switching to wrong mode
+    if (loadedAccountMode) {
+      setModeSelected(loadedAccountMode);
+      setStatsStatus("Mode is locked to the player's actual account mode. Press Clear to change.");
+      return;
+    }
+
+    refreshOverrideUI();
+    updateBoostVisibilityByMode(getModeSelected());
+  })
 );
 
 // ---------- Init ----------
@@ -1651,6 +1731,6 @@ renderTabs();
 renderHeader();
 renderButtons();
 calculate();
-
-// Init override UI 
 refreshOverrideUI();
+updateBoostVisibilityByMode(getModeSelected());
+lockModeUI(null);
