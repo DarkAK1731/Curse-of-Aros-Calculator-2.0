@@ -591,7 +591,7 @@ function buildMobButton(it) {
   const iconPath = getIconPathForItem(activeSkillKey, it.key);
   if (iconPath) {
     const img = document.createElement("img");
-    img.className = "btn-icon";
+    img.className = `btn-icon btn-icon-${it.key}`;
     img.src = iconPath;
     img.alt = "";
     img.onerror = () => {
@@ -977,7 +977,7 @@ function renderButtons() {
     const iconPath = getIconPathForItem(activeSkillKey, it.key);
     if (iconPath) {
       const img = document.createElement("img");
-      img.className = "btn-icon";
+      img.className = `btn-icon btn-icon-${activeSkillKey} btn-icon-${it.key}`;
       img.src = iconPath;
       img.alt = "";
       img.onerror = () => {
