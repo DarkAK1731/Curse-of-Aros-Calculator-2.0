@@ -1,15 +1,7 @@
 // script.js (FULL) — CoA Calculator
-// Includes: boosts (World + Stars + Relic), set bonus, alchemy modes, smithing smelt/forge,
-// mining bag tiers, inventories needed, mobs A-Z tabs, highscores loader via Worker,
-// manual overrides per username+mode (localStorage), ✅ hides boosts in Lone Wolf mode,
-// ✅ and locks mode after a successful load (prevents switching to the wrong mode).
-
-// ---- SAFETY NORMALIZER (KEEP AT VERY TOP) ----
 (function normalizeSkills() {
-  // if your data uses "magic" but your UI uses "mage"
   if (typeof skills !== "undefined" && skills?.magic && !skills?.mage) skills.mage = skills.magic;
 
-  // ensure skills.<key>.items always exists
   for (const k of Object.keys((typeof skills !== "undefined" ? skills : {}) || {})) {
     const s = skills[k];
     if (!s) continue;
@@ -63,6 +55,10 @@ const worldBoostInput = document.getElementById("worldBoost");
 const bonusStarsInput = document.getElementById("bonusStars");
 const wisdomRelicInput = document.getElementById("wisdomRelic");
 
+// ✅ Taskmaster Brew
+const taskmasterRow = document.getElementById("taskmasterRow");
+const taskmasterBrewInput = document.getElementById("taskmasterBrew");
+
 const worldBoostRow = document.getElementById("worldBoostRow");
 const bonusStarsRow = document.getElementById("bonusStarsRow");
 
@@ -112,6 +108,7 @@ const WORLD_MULT = 1.5;
 const STARS_MULT = 2;
 const INFERNAL_MULT = 1.04;
 const PROSPECTORS_NECK_MULT = 1.05;
+const TASKMASTER_MULT = 1.15;
 
 const INV_SIZE = 36;
 
@@ -245,8 +242,10 @@ function applyOverridesToCache(username, mode){
 
   for (const [src, dst] of Object.entries(map)) {
     if (!Number.isFinite(ov[src])) continue;
+    const v = clampLvl(ov[src]);
+    if (v === null) continue;
     window.__coaStatCache[dst] = window.__coaStatCache[dst] || {};
-    window.__coaStatCache[dst].level = clampLevel(ov[src]);
+    window.__coaStatCache[dst].level = v;
   }
 
   const cur = window.__coaStatCache[activeSkillKey]?.level;
@@ -626,6 +625,90 @@ function buildMobButton(it) {
   return btn;
 }
 
+// ---------- ✅ Taskboard mob limiter (Taskmaster Brew applies ONLY to these) ----------
+function normalizeMobName(s) {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/[’']/g, "") // remove apostrophes
+    .replace(/[^a-z0-9 ]/g, "") // strip other punct
+    .trim();
+}
+
+// From CoA Taskboard creature list. 1
+const TASKBOARD_MOBS = new Set([
+  "bats",
+  "slimes",
+  "fishing spiders",
+  "mushrooms",
+  "forest spiders",
+  "forest bats",
+  "snow bats",
+  "ice slimes",
+  "snowmen",
+  "ice spiders",
+  "skeletal snakes",
+  "cave spiders",
+  "skeletal bats",
+  "cave bats",
+  "raptors",
+  "ice fiends",
+  "forest fiends",
+  "rock fiends",
+  "ancient bats",
+  "ice raptors",
+  "spectral flames",
+  "phantom flames",
+  "spectral fiends",
+  "phantom fiends",
+  "ancient cyclopes",
+  "cactus soldier",
+  "anubis",
+  "golemite bat",
+].map(normalizeMobName));
+
+function isTaskboardMob(item) {
+  if (!item) return false;
+  const n = normalizeMobName(item.name);
+
+  // direct hit
+  if (TASKBOARD_MOBS.has(n)) return true;
+
+  // small singular/plural tolerance
+  // (e.g., your data might say "Bat" but taskboard says "Bats")
+  if (TASKBOARD_MOBS.has(n + "s")) return true;
+  if (n.endsWith("s") && TASKBOARD_MOBS.has(n.slice(0, -1))) return true;
+
+  return false;
+}
+
+function isCombatSkill() {
+  return activeSkillKey === "melee" || activeSkillKey === "mage";
+}
+
+// Show/enable taskmaster ONLY when it can apply, and auto-uncheck when it can't.
+function syncTaskmasterUI() {
+  if (!taskmasterRow || !taskmasterBrewInput) return;
+
+  // Only for combat tabs
+  if (!isCombatSkill()) {
+    taskmasterRow.style.display = "none";
+    taskmasterBrewInput.checked = false;
+    return;
+  }
+
+  const item = getSelectedItem();
+  const ok = isTaskboardMob(item);
+
+  // ✅ hide the whole row unless it applies
+  taskmasterRow.style.display = ok ? "" : "none";
+
+  // safety: if hidden, force off
+  if (!ok) taskmasterBrewInput.checked = false;
+}
+
 // ---------- Multipliers ----------
 function getSetMultiplier() {
   const selected = document.querySelector('input[name="setBonus"]:checked');
@@ -652,12 +735,19 @@ function getTotalMultiplier() {
       ? PROSPECTORS_NECK_MULT
       : 1;
 
-  if (activeSkillKey === "melee" || activeSkillKey === "mage") {
-    return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck;
+  // ✅ Taskmaster only for Taskboard mobs (combat only)
+  let taskmaster = 1;
+  if (isCombatSkill() && taskmasterBrewInput && taskmasterBrewInput.checked) {
+    const item = getSelectedItem();
+    if (isTaskboardMob(item)) taskmaster = TASKMASTER_MULT;
+  }
+
+  if (isCombatSkill()) {
+    return stars * world * relic * taskmaster * infernalHammer * infernalRing * prospectorsNeck;
   }
 
   const set = getSetMultiplier();
-  return stars * world * relic * infernalHammer * infernalRing * prospectorsNeck * set;
+  return stars * world * relic * taskmaster * infernalHammer * infernalRing * prospectorsNeck * set;
 }
 
 // ---------- Data access ----------
@@ -921,6 +1011,7 @@ function renderHeader() {
   }
 
   renderSmithingBarTabs();
+  syncTaskmasterUI(); // ✅ keep Taskmaster correct when changing skill/tab
 }
 
 function renderButtons() {
@@ -967,6 +1058,8 @@ function renderButtons() {
     grid.className = "grid alpha-grid";
     for (const it of list) grid.appendChild(buildMobButton(it));
     itemButtonsDiv.appendChild(grid);
+
+    syncTaskmasterUI(); // ✅ update enabled/disabled based on selected mob
     return;
   }
 
@@ -1014,6 +1107,8 @@ function renderButtons() {
 
     itemButtonsDiv.appendChild(btn);
   }
+
+  syncTaskmasterUI();
 }
 
 // ---------- Materials UI ----------
@@ -1057,7 +1152,6 @@ function setStatsStatus(msg) {
 function setStatsSummaryVisible(on) {
   if (!statsSummaryDetails) return;
   statsSummaryDetails.classList.toggle("hidden", !on);
-
   if (on) statsSummaryDetails.open = false;
 }
 
@@ -1125,6 +1219,8 @@ async function loadHighscoresForUser(username, mode) {
 
 // ---------- Calculation ----------
 function calculate() {
+  syncTaskmasterUI(); // ✅ ensures taskmaster doesn't apply when it shouldn't
+
   const skill = getSkill();
   const items = getItems();
 
@@ -1159,8 +1255,12 @@ function calculate() {
   const boostedXP = Math.floor(item.xp * mult);
 
   if (chosenP) {
+    const extra =
+      (isMobList && taskmasterBrewInput?.checked && isTaskboardMob(item))
+        ? " | Taskmaster: ON"
+        : (isMobList && taskmasterBrewInput?.checked ? " | Taskmaster: OFF (not a Taskboard mob)" : "");
     chosenP.textContent =
-      `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}`;
+      `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}${extra}`;
   }
 
   if (target <= current) {
@@ -1510,6 +1610,9 @@ if (worldBoostInput) worldBoostInput.addEventListener("change", calculate);
 if (bonusStarsInput) bonusStarsInput.addEventListener("change", calculate);
 if (wisdomRelicInput) wisdomRelicInput.addEventListener("change", calculate);
 
+// ✅ taskmaster
+if (taskmasterBrewInput) taskmasterBrewInput.addEventListener("change", calculate);
+
 if (infernalHammerInput) infernalHammerInput.addEventListener("change", calculate);
 if (infernalRingInput) infernalRingInput.addEventListener("change", calculate);
 if (prospectorsNeckInput) prospectorsNeckInput.addEventListener("change", calculate);
@@ -1699,7 +1802,6 @@ if (overrideEnabledInput) {
 if (usernameInput) {
   usernameInput.addEventListener("input", () => {
     refreshOverrideUI();
-    // if user changes username, unlock mode until they load again
     if (isStatsLoaded()) {
       window.__coaStatCache = {};
       loadedAccountMode = null;
@@ -1711,12 +1813,8 @@ if (usernameInput) {
   });
 }
 
-// Mode change handler:
-// - before load: allowed
-// - after load: blocked (because we lock radios anyway, but this adds a clear message)
 document.querySelectorAll('input[name="hiscoreMode"]').forEach((r) =>
   r.addEventListener("change", () => {
-    // if already loaded, prevent switching to wrong mode
     if (loadedAccountMode) {
       setModeSelected(loadedAccountMode);
       setStatsStatus("Mode is locked to the player's actual account mode. Press Clear to change.");
@@ -1736,3 +1834,4 @@ calculate();
 refreshOverrideUI();
 updateBoostVisibilityByMode(getModeSelected());
 lockModeUI(null);
+syncTaskmasterUI();
