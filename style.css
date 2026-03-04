@@ -281,7 +281,6 @@ body[data-skill="mage"] .btn-icon{
   }
 }
 
-/* Make <details> look clean */
 #overrideDetails > summary{
   list-style:none;
   font-weight:600;
@@ -364,14 +363,14 @@ body[data-skill="mage"]{
 
 /* ================= MOBS ICON SIZE CONTROL ================= */
 
-/* Default size for all mobs */
+/* Default size */
 .btn-icon-mob {
   width: 36px;
   height: 36px;
   object-fit: contain;
 }
 
-/* Individual mob adjustments (example) */
+/* Individual mob adjustments */
 .btn-icon-baby_dragon {
   width: 30px !important;
   height: 30px !important;
@@ -439,7 +438,6 @@ body[data-skill="mage"]{
   height: 32px;
 }
 
-/* Force mob section layout to stack properly */
 .alpha-grid {
   display: flex;
   flex-wrap: wrap;
@@ -447,82 +445,41 @@ body[data-skill="mage"]{
   margin-top: 12px;
 }
 
-/* Make the mob grid full width under the letters */
 .mob-letter-tabs {
   width: 100%;
   margin-bottom: 10px;
 }
 
-/* ================= COMPACT MOBILE MODE ================= */
-@media (max-width: 720px){
+.btn{
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  padding:12px 14px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.15s ease;
+  font-weight:700;
+}
+.btn:hover{ background:rgba(255,255,255,.06); }
 
-  /* Reduce overall spacing */
-  .wrap { padding: 8px 12px 24px; }
-  .top  { padding: 14px 12px 4px; }
+.levels-3{
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+}
 
-  /* Panels become tighter */
-  .panel{
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 14px;
-  }
+.inline-choice{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  align-items:center;
+}
 
-  /* Headings smaller */
-  h2{ font-size: 20px; margin-bottom: 8px; }
+.toggle-inline{
+  margin:0;
+}
 
-  /* Tabs smaller + tighter */
-  .tabs{ gap: 8px; }
-  .tab{
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  /* Inputs take full width and are shorter */
-  input[type="number"],
-  input[type="text"]{
-    max-width: none;
-    padding: 10px 12px;
-    border-radius: 12px;
-  }
-  .field span{ font-size: 13px; }
-
-  /* Levels layout already 1-column on mobile, but tighten gap */
-  .levels{ gap: 10px; }
-
-  /* Item buttons become compact */
-  .grid{ gap: 8px; }
-  .item-btn{
-    padding: 8px 10px;
-    border-radius: 12px;
-    gap: 8px;
-    font-size: 13px;
-  }
-
-  /* Default icons smaller */
-  .btn-icon{
-    width: 18px;
-    height: 18px;
-    flex: 0 0 18px;
-  }
-
-  /* Mobs icons smaller on mobile so the grid doesn’t explode */
-  body[data-skill="melee"] .btn-icon,
-  body[data-skill="mage"] .btn-icon{
-    width: 34px;
-    height: 34px;
-  }
-
-  /* A–Z mob tabs tighter */
-  .mob-letter-tabs{ gap: 6px; }
-  .mob-letter-tab{
-    padding: 6px 10px;
-    font-size: 12px;
-    border-radius: 999px;
-  }
-
-  /* Materials/summary rows tighter */
-  .mat-row{
-    padding: 8px 10px;
-    border-radius: 12px;
-  }
+.inline-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
 }
