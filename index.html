@@ -1,18 +1,16 @@
-<!-- index.html (FULL) -->
+<!-- index.html  -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Curse of Aros Calculator</title>
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
-
 <body>
   <header class="top">
     <h1>Curse of Aros Calculator</h1>
     <h2>By AK1731</h2>
-
     <nav class="tabs" aria-label="Skills">
       <button class="tab active" data-skill="fishing">Fishing</button>
       <button class="tab" data-skill="mining">Mining</button>
@@ -28,7 +26,6 @@
   </header>
 
   <main class="wrap">
-
     <!-- ================= Player Stats (Highscores) ================= -->
     <section class="panel" id="playerStatsPanel">
       <h2>Player Stats</h2>
@@ -36,37 +33,33 @@
         Enter ur ign to load current stats and auto-fill current levels for each skill.
       </div>
 
-      <div class="levels">
+      <div class="levels levels-3">
         <label class="field">
           <span>Username</span>
           <input id="usernameInput" type="text" placeholder="e.g. AK1731" autocomplete="off" />
         </label>
 
-        <label class="field">
+        <div class="field">
           <span>Mode</span>
-          <div class="grid">
-            <label class="toggle" style="margin:0;">
+          <div class="inline-choice">
+            <label class="toggle toggle-inline">
               <input type="radio" name="hiscoreMode" value="normal" checked />
-              Normal
+              <span>Normal</span>
             </label>
-            <label class="toggle" style="margin:0;">
+            <label class="toggle toggle-inline">
               <input type="radio" name="hiscoreMode" value="lonewolf" />
-              Lone Wolf
+              <span>Lone Wolf</span>
             </label>
           </div>
-        </label>
+        </div>
 
-        <label class="field">
+        <div class="field">
           <span>Action</span>
-          <div class="grid">
-            <button id="loadStatsBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
-              Load stats
-            </button>
-            <button id="clearStatsBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
-              Clear
-            </button>
+          <div class="inline-actions">
+            <button id="loadStatsBtn" class="btn" type="button">Load stats</button>
+            <button id="clearStatsBtn" class="btn" type="button">Clear</button>
           </div>
-        </label>
+        </div>
       </div>
 
       <p id="statsStatus" class="result" style="margin-top:10px;"></p>
@@ -79,7 +72,7 @@
 
         <label class="toggle" style="margin:10px 0 6px;">
           <input id="overrideEnabled" type="checkbox" />
-          Use my saved levels for this username (overrides highscores)
+          <span>Use my saved levels for this username (overrides highscores)</span>
         </label>
 
         <div id="overrideGrid" class="override-grid" style="margin-top:10px;">
@@ -95,13 +88,9 @@
           <label class="field"><span>Alchemy</span><input id="ov_alchemy" type="number" min="1" max="120" inputmode="numeric" /></label>
         </div>
 
-        <div class="grid" style="margin-top:10px;">
-          <button id="saveOverridesBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
-            Save my levels
-          </button>
-          <button id="clearOverridesBtn" class="tab" type="button" style="border-radius:14px; padding:12px 14px;">
-            Clear saved levels
-          </button>
+        <div class="inline-actions" style="margin-top:10px;">
+          <button id="saveOverridesBtn" class="btn" type="button">Save my levels</button>
+          <button id="clearOverridesBtn" class="btn" type="button">Clear saved levels</button>
         </div>
 
         <div class="subtle" style="margin-top:8px;">
@@ -109,6 +98,7 @@
         </div>
       </details>
 
+      <!-- Loaded summary (collapsible) -->
       <details id="statsSummaryDetails" class="materials hidden" style="margin-top:10px;">
         <summary class="subtle" style="cursor:pointer;">
           Loaded summary — click to open
@@ -120,18 +110,15 @@
     <!-- ================= Levels ================= -->
     <section class="panel">
       <h2 id="skillTitle">Fishing</h2>
-
       <div class="levels">
         <label class="field">
           <span id="currentLabel">Your Fishing Level</span>
           <input id="currentLevel" type="number" min="1" max="120" value="1" inputmode="numeric" />
         </label>
-
         <label class="field">
           <span id="targetLabel">Target Fishing Level</span>
           <input id="targetLevel" type="number" min="1" max="120" value="5" inputmode="numeric" />
         </label>
-
         <label class="field">
           <span id="currentXPLabel">Current XP % (0–100)</span>
           <input id="currentXP" type="number" min="0" max="100" value="0" inputmode="numeric" />
@@ -141,21 +128,20 @@
 
     <!-- ================= Item Selection ================= -->
     <section class="panel">
-
       <!-- Alchemy sub-tabs -->
       <div id="alchemyModeBox" class="boosts" style="display:none; margin-bottom:10px;">
         <div class="subtle">Alchemy mode</div>
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="gather_only" checked />
-          Gather Only (Plants)
+          <span>Gather Only (Plants)</span>
         </label>
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="brew_only" />
-          Brew Only (Potions / Brews)
+          <span>Brew Only (Potions / Brews)</span>
         </label>
         <label class="toggle">
           <input type="radio" name="alchemyMode" value="gather_brew" />
-          Gather + Brew
+          <span>Gather + Brew</span>
         </label>
       </div>
 
@@ -164,11 +150,11 @@
         <div class="subtle">Smithing mode</div>
         <label class="toggle">
           <input type="radio" name="smithingMode" value="smelt" checked />
-          Smelt Bars
+          <span>Smelt Bars</span>
         </label>
         <label class="toggle">
           <input type="radio" name="smithingMode" value="forge" />
-          Forge Equipment
+          <span>Forge Equipment</span>
         </label>
       </div>
 
@@ -178,64 +164,53 @@
         <div id="smithingBarTabs" class="grid"></div>
       </div>
 
-      <div class="subtle" id="selectHint">
-        Select an item (locked until you reach the required level)
-      </div>
+      <div class="subtle" id="selectHint">Select an item (locked until you reach the required level)</div>
       <div id="itemButtons" class="grid"></div>
     </section>
 
     <!-- ================= Boosts ================= -->
     <section class="panel">
       <div class="boosts">
-
         <!-- World Boost -->
         <label class="toggle" id="worldBoostRow">
           <input id="worldBoost" type="checkbox" />
-          <img class="toggle-icon boost-icon"
-               data-name="world_boost"
-               src="./Boosts/world_boost.png"
-               alt="World Boost" loading="lazy" />
-          World Boost (+50%)
+          <img class="toggle-icon boost-icon" data-name="world_boost" src="./Boosts/world_boost.png" alt="World Boost" loading="lazy" />
+          <span>World Boost (+50%)</span>
         </label>
 
         <!-- Bonus XP Stars -->
         <label class="toggle" id="bonusStarsRow">
           <input id="bonusStars" type="checkbox" />
-          <img class="toggle-icon boost-icon"
-               data-name="bonus_star"
-               src="./Boosts/bonus_star.png"
-               alt="Bonus XP Stars" loading="lazy" />
-          Bonus XP Stars (x2)
+          <img class="toggle-icon boost-icon" data-name="bonus_star" src="./Boosts/bonus_star.png" alt="Bonus XP Stars" loading="lazy" />
+          <span>Bonus XP Stars (x2)</span>
         </label>
 
         <!-- Wisdom / EXP Relic -->
         <label class="toggle">
           <input id="wisdomRelic" type="checkbox" />
-          <img id="relicIcon"
-               class="toggle-icon boost-icon"
-               data-name="relic_of_wisdom"
-               src="./Boosts/relic_of_wisdom.png"
-               alt="Relic" loading="lazy" />
-          <span id="relicName">Wisdom Relic</span> (+5%)
+          <img id="relicIcon" class="toggle-icon boost-icon" data-name="relic_of_wisdom" src="./Boosts/relic_of_wisdom.png" alt="Relic" loading="lazy" />
+          <span><span id="relicName">Wisdom Relic</span> (+5%)</span>
+        </label>
+
+        <!-- ✅ Taskmaster Brew (combat-only, mob-limited) -->
+        <!-- IMPORTANT: hidden by default; script will show it only for melee/mage -->
+        <label class="toggle" id="taskmasterRow" style="display:none;">
+          <input id="taskmasterBrew" type="checkbox" />
+          <img class="toggle-icon boost-icon" data-name="taskmaster_brew" src="./Boosts/taskmasters_brew.png" alt="Taskmaster Brew" loading="lazy" />
+          <span>Taskmaster Brew (+15%)</span>
         </label>
 
         <!-- Smithing-only boosts -->
         <div id="smithingInfernalBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="infernalHammer" type="checkbox" />
-            <img class="toggle-icon boost-icon"
-                 data-name="infernal_hammer"
-                 src="./Boosts/infernal_hammer.png"
-                 alt="Infernal Hammer" loading="lazy" />
-            Infernal Hammer (+4%)
+            <img class="toggle-icon boost-icon" data-name="infernal_hammer" src="./Boosts/infernal_hammer.png" alt="Infernal Hammer" loading="lazy" />
+            <span>Infernal Hammer (+4%)</span>
           </label>
           <label class="toggle">
             <input id="infernalRing" type="checkbox" />
-            <img class="toggle-icon boost-icon"
-                 data-name="infernal_ring"
-                 src="./Boosts/infernal_ring.png"
-                 alt="Infernal Ring" loading="lazy" />
-            Infernal Ring (+4%)
+            <img class="toggle-icon boost-icon" data-name="infernal_ring" src="./Boosts/infernal_ring.png" alt="Infernal Ring" loading="lazy" />
+            <span>Infernal Ring (+4%)</span>
           </label>
         </div>
 
@@ -243,52 +218,27 @@
         <div id="miningProspectorBox" style="display:none; margin-top:6px;">
           <label class="toggle">
             <input id="prospectorsNeck" type="checkbox" />
-            <img class="toggle-icon boost-icon"
-                 data-name="prospectors_necklace"
-                 src="./Boosts/prospectors_necklace.png"
-                 alt="Prospector's Necklace" loading="lazy" />
-            Prospector's Neck (+5%)
+            <img class="toggle-icon boost-icon" data-name="prospectors_necklace" src="./Boosts/prospectors_necklace.png" alt="Prospector's Necklace" loading="lazy" />
+            <span>Prospector's Neck (+5%)</span>
           </label>
         </div>
 
         <!-- Mining Bag -->
         <div id="miningBagBox" style="display:none; margin-top:6px;">
           <div class="subtle">Mining Bag</div>
-          <label class="toggle">
-            <input type="radio" name="miningBagTier" value="0" checked />
-            None
-          </label>
-          <label class="toggle">
-            <input type="radio" name="miningBagTier" value="1" />
-            Tier 1 (+6 slots, takes up 1 slot)
-          </label>
-          <label class="toggle">
-            <input type="radio" name="miningBagTier" value="2" />
-            Tier 2 (+12 slots, takes up 1 slot)
-          </label>
-          <label class="toggle">
-            <input type="radio" name="miningBagTier" value="3" />
-            Tier 3 (+18 slots, takes up 1 slot)
-          </label>
+          <label class="toggle"><input type="radio" name="miningBagTier" value="0" checked /> <span>None</span></label>
+          <label class="toggle"><input type="radio" name="miningBagTier" value="1" /> <span>Tier 1 (+6 slots, takes up 1 slot)</span></label>
+          <label class="toggle"><input type="radio" name="miningBagTier" value="2" /> <span>Tier 2 (+12 slots, takes up 1 slot)</span></label>
+          <label class="toggle"><input type="radio" name="miningBagTier" value="3" /> <span>Tier 3 (+18 slots, takes up 1 slot)</span></label>
         </div>
 
         <!-- Set bonus -->
         <div id="setBonusBox">
           <div class="subtle" style="margin-top:10px;">Set bonus</div>
-          <label class="toggle">
-            <input type="radio" name="setBonus" value="1" checked />
-            None
-          </label>
-          <label class="toggle">
-            <input type="radio" name="setBonus" value="1.06" />
-            Tier 1–3 set (+6%)
-          </label>
-          <label class="toggle">
-            <input type="radio" name="setBonus" value="1.12" />
-            Tier 4 set (+12%)
-          </label>
+          <label class="toggle"><input type="radio" name="setBonus" value="1" checked /> <span>None</span></label>
+          <label class="toggle"><input type="radio" name="setBonus" value="1.06" /> <span>Tier 1–3 set (+6%)</span></label>
+          <label class="toggle"><input type="radio" name="setBonus" value="1.12" /> <span>Tier 4 set (+12%)</span></label>
         </div>
-
       </div>
     </section>
 
@@ -297,18 +247,15 @@
       <p id="chosen" class="chosen"></p>
       <p id="result" class="result"></p>
       <p id="inventories" class="result"></p>
-
       <div id="materialsBox" class="materials hidden">
         <div class="subtle" id="materialsTitle">Total materials needed</div>
         <div id="materialsList" class="mat-list"></div>
       </div>
     </section>
 
-    <!-- optional debug panel (safe to remove) -->
     <section class="panel" id="debugPanel" style="display:none;">
       <p id="debugText" class="result"></p>
     </section>
-
   </main>
 
   <footer class="support-footer">
@@ -317,20 +264,14 @@
     </a>
   </footer>
 
-  <!-- ✅ IMPORTANT: data first, then script -->
   <script src="./data.js"></script>
   <script src="./script.js"></script>
 
-  <!-- Optional: quick error output if scripts fail -->
   <script>
     (function () {
       try {
-        if (typeof skills === "undefined") {
-          console.warn("skills is undefined: data.js may not have loaded or doesn't define skills.");
-        }
-        if (typeof levelXP === "undefined") {
-          console.warn("levelXP is undefined: ensure it's defined in data.js or load it before script.js.");
-        }
+        if (typeof skills === "undefined") console.warn("skills is undefined: data.js may not have loaded or doesn't define skills.");
+        if (typeof levelXP === "undefined") console.warn("levelXP is undefined: ensure it's defined in data.js or load it before script.js.");
       } catch (e) {}
     })();
   </script>
