@@ -1257,8 +1257,8 @@ function calculate() {
   if (chosenP) {
     const extra =
       (isMobList && taskmasterBrewInput?.checked && isTaskboardMob(item))
-        ? " | Taskmaster: ON"
-        : (isMobList && taskmasterBrewInput?.checked ? " | Taskmaster: OFF (not a Taskboard mob)" : "");
+        ? " "
+        : (isMobList && taskmasterBrewInput?.checked ? " " : "");
     chosenP.textContent =
       `Selected: ${item.name} (Lvl ${item.level}), Base XP: ${fmt(item.xp)}, Boosted XP: ${fmt(boostedXP)}${extra}`;
   }
