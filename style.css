@@ -483,3 +483,24 @@ body[data-skill="mage"]{
   flex-wrap:wrap;
   align-items:center;
 }
+
+
+/* =========================
+   MOBILE FIX - Player Stats
+   ========================= */
+@media (max-width: 768px) {
+  .levels-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .inline-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .inline-actions .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}
