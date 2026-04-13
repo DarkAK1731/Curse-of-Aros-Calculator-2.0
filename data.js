@@ -1,4 +1,4 @@
-// data.js 
+// data.js (FULL + UPDATED Smithing smelt + forge items + new high-level bars/alloys)
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -455,6 +455,8 @@ const skills = {
       { key:"anubis", name:"Anubis", level:90, xp:4000, meta:{ mobLevel:90 } },
       { key:"anubis_elite", name:"Anubis Elite", level:110, xp:7500, meta:{ mobLevel:110 } },
       { key:"arosite_scarab", name:"Arosite Scarab", level:75, xp:2850, meta:{ mobLevel:75 } },
+      { key:"armoured_bear", name:"Armoured Bear", level:75, xp:3000, meta:{mobLevel:75}},
+      { key:"armoured_bear_elite", name:"Armoured Bear Elite", level:165, xp:15500, meta:{mobLevel:165}},
       { key:"baby_dragon", name:"Baby Dragon", level:110, xp:5750, meta:{ mobLevel:110 } },
       { key:"bat", name:"Bat", level:1, xp:8, meta:{ mobLevel:1 } },
       { key:"brown_snake", name:"Brown Snake", level:120, xp:1000, meta:{ mobLevel:120 } },
@@ -521,6 +523,8 @@ const skills = {
       { key:"anubis", name:"Anubis", level:90, xp:4000, meta:{ mobLevel:90 } },
       { key:"anubis_elite", name:"Anubis Elite", level:110, xp:7500, meta:{ mobLevel:110 } },
       { key:"arosite_scarab", name:"Arosite Scarab", level:75, xp:2850, meta:{ mobLevel:75 } },
+      { key:"armoured_bear", name:"Armoured Bear", level:75, xp:3000, meta:{mobLevel:75}},
+      { key:"armoured_bear_elite", name:"Armoured Bear Elite", level:165, xp:15500, meta:{mobLevel:165}}, 
       { key:"baby_dragon", name:"Baby Dragon", level:110, xp:5750, meta:{ mobLevel:110 } },
       { key:"baby_seedling", name:"Baby Seedling", level:10, xp:40, meta:{ mobLevel:10 } },
       { key:"bat", name:"Bat", level:1, xp:8, meta:{ mobLevel:1 } },
@@ -576,5 +580,6 @@ const skills = {
   },
 };
 
+// Make sure other scripts can read these globals reliably:
 window.levelXP = levelXP;
 window.skills = skills;
