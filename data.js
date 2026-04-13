@@ -1,4 +1,4 @@
-// data.js (FULL + UPDATED Smithing smelt + forge items + new high-level bars/alloys)
+// data.js 
 const levelXP = [
   null,
   0, 46, 99, 159, 229, 309, 401, 507, 628, 768,
@@ -456,7 +456,7 @@ const skills = {
       { key:"anubis_elite", name:"Anubis Elite", level:110, xp:7500, meta:{ mobLevel:110 } },
       { key:"arosite_scarab", name:"Arosite Scarab", level:75, xp:2850, meta:{ mobLevel:75 } },
       { key:"armoured_bear", name:"Armoured Bear", level:75, xp:3000, meta:{mobLevel:75}},
-      { key:"armoured_bear_elite", name:"Armoured Bear Elite", level:165, xp:15500, meta:{mobLevel:165}},
+      { key:"armoured_bear_elite", name:"Armoured Bear Elite", level:165, xp:15500, meta:{mobLevel:165}}, 
       { key:"baby_dragon", name:"Baby Dragon", level:110, xp:5750, meta:{ mobLevel:110 } },
       { key:"bat", name:"Bat", level:1, xp:8, meta:{ mobLevel:1 } },
       { key:"brown_snake", name:"Brown Snake", level:120, xp:1000, meta:{ mobLevel:120 } },
@@ -580,6 +580,5 @@ const skills = {
   },
 };
 
-// Make sure other scripts can read these globals reliably:
 window.levelXP = levelXP;
 window.skills = skills;
